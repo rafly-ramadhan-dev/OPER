@@ -10,13 +10,13 @@
 <style>
 :root{
   --bg:#eef2f6; --surface:#ffffff; --ink:#14213d; --muted:#5b6b82; --line:#d5dde8;
-  --accent:#2b50ff; --accent-ink:#ffffff; --teal:#0a7d6b; --danger:#c2362b;
+  --accent:#2b50ff; --accent-ink:#ffffff; --teal:#0a7d6b; --amber:#b45309; --danger:#c2362b;
   --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{ --bg:#0e1524; --surface:#16203a; --ink:#e8eefc; --muted:#98a6c3; --line:#26335a;
-         --accent:#7f9bff; --accent-ink:#0e1524; --teal:#4fd1b5; --danger:#ff8a80; }
+         --accent:#7f9bff; --accent-ink:#0e1524; --teal:#4fd1b5; --amber:#f5b25b; --danger:#ff8a80; }
 }
 *{ box-sizing:border-box; }
 html{ background:var(--bg); }
@@ -53,6 +53,8 @@ label{ display:block; font-weight:600; font-size:.9rem; margin:.75rem 0 .25rem; 
 #list{ list-style:none; margin:0; padding:0; }
 .item{ display:flex; justify-content:space-between; gap:1rem; padding:.9rem 0 .9rem .9rem; border-left:4px solid var(--accent); border-bottom:1px solid var(--line); }
 .item.link{ border-left-color:var(--teal); }
+.item.file{ border-left-color:var(--amber); }
+.left{ display:flex; align-items:center; gap:.75rem; min-width:0; flex-wrap:wrap; }
 .body{ min-width:0; }
 .content{ margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
 .meta{ color:var(--muted); font-size:.8rem; }
@@ -98,14 +100,18 @@ label{ display:block; font-weight:600; font-size:.9rem; margin:.75rem 0 .25rem; 
       <label for="draft" class="sr" style="position:absolute;left:-9999px">Teks atau link</label>
       <textarea id="draft" placeholder="Tempel teks atau link di sini"></textarea>
       <div class="row">
-        <p class="hint">Ctrl+Enter untuk kirim</p>
+        <div class="left">
+          <button class="ghost" id="pick" type="button">Pilih file atau foto</button>
+          <p class="hint" id="hint">Ctrl+Enter untuk kirim teks</p>
+        </div>
         <button class="btn" id="send" type="submit">Kirim</button>
       </div>
+      <input id="file" type="file" multiple hidden>
     </form>
 
     <h2 class="list-head">Kotak masuk</h2>
     <ul id="list"></ul>
-    <p class="empty" id="empty" hidden>Belum ada kiriman. Tempel teks atau link di atas, lalu buka Oper di perangkat lain untuk melihatnya.</p>
+    <p class="empty" id="empty" hidden>Belum ada kiriman. Tempel teks atau link di atas, atau pilih file, lalu buka Oper di perangkat lain untuk melihatnya.</p>
   </section>
 </main>
 <p id="toast" role="status" aria-live="polite"></p>
@@ -184,6 +190,16 @@ async function copyText(text){
   catch { toast('Tidak bisa menyalin otomatis. Tahan teksnya lalu salin manual.'); }
 }
 
+const BUCKET = 'oper-files', MAX_BYTES = 50 * 1024 * 1024;
+const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+
+async function downloadFile(it){
+  const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(it.file_path, 60, { download: it.content });
+  if (error) { toast('Gagal mengunduh: ' + error.message); return; }
+  const a = document.createElement('a'); a.href = data.signedUrl; a.rel = 'noopener';
+  document.body.append(a); a.click(); a.remove();
+}
+
 function render(items){
   const list = $('list'); list.replaceChildren();
   $('empty').hidden = items.length > 0;
@@ -192,13 +208,20 @@ function render(items){
     const body = document.createElement('div'); body.className = 'body';
     const p = document.createElement('p'); p.className = 'content'; p.textContent = it.content;
     const meta = document.createElement('span'); meta.className = 'meta';
-    meta.textContent = (it.kind === 'link' ? 'Link, ' : 'Teks, ') + fmt(it.created_at);
+    const label = it.kind === 'link' ? 'Link' : it.kind === 'file' ? 'File, ' + fmtSize(it.file_size || 0) : 'Teks';
+    meta.textContent = label + ', ' + fmt(it.created_at);
     body.append(p, meta);
 
     const acts = document.createElement('div'); acts.className = 'acts';
-    const copy = document.createElement('button'); copy.className = 'ghost'; copy.type = 'button'; copy.textContent = 'Salin';
-    copy.addEventListener('click', () => copyText(it.content));
-    acts.append(copy);
+    if (it.kind === 'file') {
+      const dl = document.createElement('button'); dl.className = 'ghost'; dl.type = 'button'; dl.textContent = 'Unduh';
+      dl.addEventListener('click', () => downloadFile(it));
+      acts.append(dl);
+    } else {
+      const copy = document.createElement('button'); copy.className = 'ghost'; copy.type = 'button'; copy.textContent = 'Salin';
+      copy.addEventListener('click', () => copyText(it.content));
+      acts.append(copy);
+    }
     if (it.kind === 'link') {
       const open = document.createElement('a'); open.className = 'ghost'; open.textContent = 'Buka';
       open.href = it.content; open.target = '_blank'; open.rel = 'noopener noreferrer';
@@ -206,6 +229,7 @@ function render(items){
     }
     const del = document.createElement('button'); del.className = 'ghost danger'; del.type = 'button'; del.textContent = 'Hapus';
     del.addEventListener('click', async () => {
+      if (it.kind === 'file' && it.file_path) await sb.storage.from(BUCKET).remove([it.file_path]);
       const { error } = await sb.from('items').delete().eq('id', it.id);
       if (error) toast('Gagal hapus: ' + error.message); else load();
     });
@@ -226,6 +250,25 @@ $('compose').addEventListener('submit', async e => {
   if (error) { toast('Gagal kirim: ' + error.message); return; }
   $('draft').value = '';
   toast(kind === 'link' ? 'Link terkirim' : 'Teks terkirim');
+  load();
+});
+$('pick').addEventListener('click', () => $('file').click());
+$('file').addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  $('pick').disabled = true;
+  for (const f of files) {
+    if (f.size > MAX_BYTES) { toast(f.name + ' lebih dari 50 MB'); continue; }
+    $('hint').textContent = 'Mengunggah ' + f.name + '...';
+    const safe = f.name.replace(/[^\w.\-]+/g, '_');
+    const path = currentUser + '/' + Date.now() + Math.random().toString(36).slice(2, 8) + '-' + safe;
+    const { error: upErr } = await sb.storage.from(BUCKET).upload(path, f, { contentType: f.type || 'application/octet-stream' });
+    if (upErr) { toast('Gagal unggah ' + f.name + ': ' + upErr.message); continue; }
+    const { error } = await sb.from('items').insert({ kind: 'file', content: f.name, file_path: path, file_size: f.size });
+    if (error) { await sb.storage.from(BUCKET).remove([path]); toast('Gagal simpan ' + f.name + ': ' + error.message); }
+  }
+  $('hint').textContent = 'Ctrl+Enter untuk kirim teks';
+  $('pick').disabled = false;
   load();
 });
 $('draft').addEventListener('keydown', e => {
