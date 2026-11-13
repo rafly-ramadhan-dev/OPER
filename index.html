@@ -113,6 +113,20 @@ html[data-bub=soft] .bub{border-radius:26px}
 #lb .bar{position:absolute;top:1rem;right:1rem;display:flex;gap:.5rem}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.2s}
 @media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+[class*=fx-]{--nc:#7f9bff}
+.fx-solid,.fx-glow,.fx-pulse{color:var(--nc)}
+.fx-glow{text-shadow:0 0 .55em var(--nc)}
+.fx-pulse{animation:pl 1.6s ease-in-out infinite}
+@keyframes pl{50%{opacity:.4}}
+.fx-shimmer,.fx-rainbow{background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 2.4s linear infinite}
+.fx-shimmer{background-image:linear-gradient(90deg,var(--nc),#fff,var(--nc))}
+.fx-rainbow{background-image:linear-gradient(90deg,#ff5f6d,#ffc371,#47e891,#3ac7ff,#b36bff,#ff5f6d);animation-duration:4s}
+@keyframes sh{to{background-position:200% center}}
+.fr-neon{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #39ffb6,0 0 14px 4px #39ffb6aa}
+.fr-gold{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #ffd24a,0 0 12px 3px #ffb300aa}
+.fr-rainbow{animation:rg 3s linear infinite}
+@keyframes rg{0%,100%{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #ff5f6d,0 0 14px 3px #ff5f6d99}33%{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #47e891,0 0 14px 3px #47e89199}66%{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #3ac7ff,0 0 14px 3px #3ac7ff99}}
+@media(prefers-reduced-motion:reduce){[class*=fx-],[class*=fr-]{animation:none!important}}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -239,6 +253,17 @@ adm|Kode admin|Admin code|管理者コード
 admok|Kamu sekarang admin|You are now an admin|管理者になりました
 admbad|Kode salah atau sudah dipakai|Wrong or used code|コードが無効です
 saved|Tersimpan|Saved|保存しました
+fxh|Gaya admin|Admin style|管理者スタイル
+ncolor|Warna nama|Name color|名前の色
+fx|Efek nama|Name effect|名前エフェクト
+f_none|Tanpa|None|なし
+f_glow|Menyala|Glow|グロー
+f_pulse|Berdenyut|Pulse|点滅
+f_shimmer|Berkilau|Shimmer|きらめき
+f_rainbow|Pelangi|Rainbow|レインボー
+frame|Bingkai foto|Photo frame|フレーム
+f_neon|Neon|Neon|ネオン
+f_gold|Emas|Gold|ゴールド
 install|Pasang aplikasi|Install app|アプリをインストール`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
@@ -254,7 +279,9 @@ const TABS=['chats','media','friends','settings'];
 const peerOf=m=>m.sender_id===S.me?m.recipient_id:m.sender_id;
 const name=id=>id===S.me?t('me'):((S.pp[id]||{}).display_name||'@'+(S.pf[id]||'?'));
 const vt=f=>document.startViewTransition?document.startViewTransition(f):f();
-const av=id=>{const p=S.pp[id]||{},e=h('span',{class:'av'});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();return e};
+const av=id=>{const p=S.pp[id]||{},e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();return e};
+const nmx=(p,text)=>{const fx=/^(glow|pulse|shimmer|rainbow)$/.test(p.name_fx)?'fx-'+p.name_fx:'',col=/^#[0-9a-f]{6}$/i.test(p.name_color||''),e=h('b',{class:fx||(col?'fx-solid':'')},text);if(col)e.style.setProperty('--nc',p.name_color);return e};
+const nm=id=>nmx(S.pp[id]||{},name(id));
 const other=f=>f.requester===S.me?f.addressee:f.requester;
 const friends=()=>S.fr.filter(f=>f.status==='accepted').map(other);
 const isImg=n=>/\.(jpe?g|png|gif|webp|avif)$/i.test(n);
@@ -325,7 +352,7 @@ function render(){
 function renderSide(){
   const last=id=>S.msgs.filter(m=>peerOf(m)===id).pop();
   const ids=[S.me,...friends()].sort((a,b)=>((last(b)||{}).created_at||'').localeCompare((last(a)||{}).created_at||''));
-  $('side').replaceChildren(h('h2',{},t('chats')),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':''),onclick:()=>{S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},h('b',{},name(id)),h('small',{},l?preview(l):t('empty'))),l?h('time',{},hm(l.created_at)):null)}));
+  $('side').replaceChildren(h('h2',{},t('chats')),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':''),onclick:()=>{S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},l?preview(l):t('empty'))),l?h('time',{},hm(l.created_at)):null)}));
 }
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
 function bubble(m){
@@ -337,7 +364,7 @@ function bubble(m){
   return h('div',{class:'row '+(mine?'me':'you')},h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')+(m.kind==='sticker'?' st':'')},...c,h('time',{},hm(m.created_at)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
 }
 function renderChat(){
-  $('chead').replaceChildren(h('button',{class:'back','aria-label':'back',onclick:()=>{S.peer=null;render()}},'‹'),av(S.peer),h('span',{class:'cm'},h('b',{},name(S.peer)),h('small',{style:'color:var(--mut)'},(S.pp[S.peer]||{}).bio||'')));
+  $('chead').replaceChildren(h('button',{class:'back','aria-label':'back',onclick:()=>{S.peer=null;render()}},'‹'),av(S.peer),h('span',{class:'cm'},nm(S.peer),h('small',{style:'color:var(--mut)'},(S.pp[S.peer]||{}).bio||'')));
   const bd=$('body'),near=bd.scrollHeight-bd.scrollTop-bd.clientHeight<140||bd.dataset.p!==S.peer;
   bd.className='msgs';bd.dataset.p=S.peer;
   bd.replaceChildren(...S.msgs.filter(m=>peerOf(m)===S.peer).map(bubble));
@@ -352,7 +379,7 @@ function renderMedia(){
 function renderFriends(){
   const bd=$('body'),keep=($('fu')||{}).value||'';bd.className='pane';
   const inc=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me),out=S.fr.filter(f=>f.status==='pending'&&f.requester===S.me),ok=S.fr.filter(f=>f.status==='accepted');
-  const row=(f,...b)=>h('div',{class:'frow'},h('span',{class:'who'},av(other(f)),h('b',{},name(other(f)))),h('span',{class:'acts'},...b));
+  const row=(f,...b)=>h('div',{class:'frow'},h('span',{class:'who'},av(other(f)),nm(other(f))),h('span',{class:'acts'},...b));
   const rm=(f,l)=>h('button',{class:'ghost',onclick:()=>frDo(f)},t(l));
   bd.replaceChildren(...[h('h2',{},t('friends')),
     h('form',{class:'add',onsubmit:addFriend},h('input',{id:'fu',placeholder:t('addph'),autocapitalize:'none',autocomplete:'off',required:true}),h('button',{class:'btn'},t('request'))),
@@ -378,13 +405,14 @@ function renderSettings(){
   const bub=h('div',{class:'set'},h('p',{},t('bub')),seg([['round',t('b_round')],['sharp',t('b_sharp')],['soft',t('b_soft')]],pref('bub')||'round',v=>{pref('bub',v);applyTheme();render()}),
     h('p',{},t('mine')),h('div',{class:'acts'},h('input',{type:'color',value:pref('mine')||'#7f9bff',oninput:e=>{pref('mine',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('mine',null);applyTheme();render()}},t('reset'))));
   const inst=ip?h('div',{class:'set'},h('button',{class:'btn',onclick:async()=>{ip.prompt();await ip.userChoice;ip=null;render()}},t('install'))):h('span');
+  const fxb=S.prof.is_admin?fxBlock():h('span');
   const adm=S.prof.is_admin?h('span'):h('div',{class:'set'},h('p',{},t('adm')),h('div',{class:'add'},h('input',{id:'ac',type:'password',autocomplete:'off'}),h('button',{class:'btn sm',onclick:redeem},t('save'))));
   bd.replaceChildren(h('h2',{},t('settings')),h('p',{},h('b',{},'@'+S.prof.username)),prof,
     h('div',{class:'set'},h('p',{},t('theme')),seg([['black',t('th_black')],['dark',t('th_dark')],['light',t('th_light')]],cur,v=>{pref('theme',v);applyTheme();render()})),
     h('div',{class:'set'},h('p',{},t('accent')),h('div',{class:'acts'},h('input',{type:'color',value:pref('accent')||'#7f9bff',oninput:e=>{pref('accent',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('accent',null);applyTheme();render()}},t('reset')))),
     bub,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
-    inst,adm,
+    inst,fxb,adm,
     h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')));
 }
 
@@ -428,6 +456,14 @@ const STK=['😀','😂','🥹','😍','😎','🤔','😭','😡','👍','👏'
 $('sp').replaceChildren(...STK.map(x=>h('button',{type:'button',onclick:async()=>{$('sp').hidden=true;if(!S.peer)return;const{error}=await sb.from('messages').insert({recipient_id:S.peer,kind:'sticker',content:x});error?toast(error.message):loadAll()}},x)));
 $('stb').onclick=()=>{$('sp').hidden=!$('sp').hidden};
 
+function fxBlock(){
+  const P=S.prof,seg2=(items,cur,key)=>h('div',{class:'seg'},...items.map(v=>h('button',{class:(cur||'none')===v?'on':'',onclick:()=>saveFx({[key]:v})},t('f_'+v))));
+  return h('div',{class:'set'},h('p',{},t('fxh')),h('p',{style:'font-size:1.3rem'},nmx(P,P.display_name||'@'+P.username)),
+    h('p',{},t('ncolor')),h('div',{class:'acts'},h('input',{type:'color',value:P.name_color||'#7f9bff',onchange:e=>saveFx({name_color:e.target.value})}),h('button',{class:'ghost',onclick:()=>saveFx({name_color:null})},t('reset'))),
+    h('p',{style:'margin-top:.8rem'},t('fx')),seg2(['none','glow','pulse','shimmer','rainbow'],P.name_fx,'name_fx'),
+    h('p',{},t('frame')),seg2(['none','neon','gold','rainbow'],P.frame,'frame'));
+}
+async function saveFx(patch){const{error}=await sb.from('profiles').update(patch).eq('id',S.me);if(error)return toast(error.message);Object.assign(S.prof,patch);S.pp[S.me]=S.prof;render()}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
