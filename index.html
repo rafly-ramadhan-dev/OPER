@@ -311,11 +311,11 @@ function renderFriends(){
   const inc=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me),out=S.fr.filter(f=>f.status==='pending'&&f.requester===S.me),ok=S.fr.filter(f=>f.status==='accepted');
   const row=(f,...b)=>h('div',{class:'frow'},h('b',{},'@'+(S.pf[other(f)]||'?')),h('span',{class:'acts'},...b));
   const rm=(f,l)=>h('button',{class:'ghost',onclick:()=>frDo(f)},t(l));
-  bd.replaceChildren(h('h2',{},t('friends')),
+  bd.replaceChildren(...[h('h2',{},t('friends')),
     h('form',{class:'add',onsubmit:addFriend},h('input',{id:'fu',placeholder:t('addph'),autocapitalize:'none',autocomplete:'off',required:true}),h('button',{class:'btn'},t('request'))),
     inc.length?h('h3',{},t('incoming')):null,...inc.map(f=>row(f,h('button',{class:'btn sm',onclick:()=>frDo(f,true)},t('accept')),rm(f,'decline'))),
     out.length?h('h3',{},t('sent')):null,...out.map(f=>row(f,rm(f,'del'))),
-    ok.length?h('h3',{},t('friends')+' ('+ok.length+')'):null,...ok.map(f=>row(f,h('button',{class:'ghost',onclick:()=>{S.tab='chats';S.peer=other(f);render()}},t('chats')),rm(f,'del'))));
+    ok.length?h('h3',{},t('friends')+' ('+ok.length+')'):null,...ok.map(f=>row(f,h('button',{class:'ghost',onclick:()=>{S.tab='chats';S.peer=other(f);render()}},t('chats')),rm(f,'del')))].filter(Boolean));
   $('fu').value=keep;
 }
 async function addFriend(e){e.preventDefault();const u=$('fu').value.trim().replace(/^@/,'').toLowerCase();if(!u)return;
