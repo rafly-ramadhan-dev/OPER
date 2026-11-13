@@ -57,7 +57,7 @@ body:not([data-tab=chats]) #side{display:none}
 .pane{padding:1.75rem clamp(1rem,4vw,3rem);max-width:58rem;width:100%;margin:0 auto}
 .row{display:flex}.row.me{justify-content:flex-end}
 .bub{position:relative;max-width:min(34rem,82%);padding:.5rem .8rem .3rem;border-radius:18px;background:var(--sf2);overflow-wrap:anywhere}
-.row.me .bub{background:var(--accent);color:var(--on);border-bottom-right-radius:6px}
+.row.me .bub{background:var(--mine,var(--accent));color:var(--mon,var(--on));border-bottom-right-radius:6px}
 .row.you .bub{border-bottom-left-radius:6px}
 .bub time{display:block;font-size:.7rem;opacity:.65;text-align:right}
 .bub a{color:inherit;text-decoration:underline}
@@ -73,9 +73,9 @@ body:not([data-tab=chats]) #side{display:none}
 .row.me .bub.new{transform-origin:bottom right}
 @media(prefers-reduced-motion:reduce){.bub.new{animation:none}}
 
-#composer{display:flex;gap:.5rem;align-items:flex-end;padding:.75rem clamp(1rem,4vw,3rem) calc(.75rem + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+#composer{position:relative;display:flex;gap:.5rem;align-items:flex-end;padding:.75rem clamp(1rem,4vw,3rem) calc(.75rem + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 #draft{field-sizing:content;min-height:2.8rem;max-height:8rem;resize:none;border-radius:22px;padding:.65rem 1rem}
-#pick{width:2.8rem;height:2.8rem;border-radius:50%;border:1px solid var(--line);background:var(--sf);font-size:1.4rem;cursor:pointer;flex-shrink:0}
+#pick,#stb{width:2.8rem;height:2.8rem;border-radius:50%;border:1px solid var(--line);background:var(--sf);font-size:1.4rem;cursor:pointer;flex-shrink:0}
 #composer .btn{height:2.8rem;border-radius:22px}
 
 .chips,.seg{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -95,6 +95,20 @@ input[type=color]{width:3rem;height:2.4rem;padding:.15rem;cursor:pointer}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
+html[data-bub=sharp] .bub{border-radius:6px!important}
+html[data-bub=soft] .bub{border-radius:26px}
+.av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.who{display:flex;align-items:center;gap:.6rem}.who .av{width:2.2rem;height:2.2rem;font-size:.9rem}
+#chead .av{width:2.2rem;height:2.2rem;font-size:.9rem}
+#chead .cm{line-height:1.2}
+.bub.st{background:none!important;padding:0 .2rem}.stk{font-size:4rem;line-height:1.15;display:block}
+.sp{position:absolute;bottom:calc(100% + .4rem);left:clamp(1rem,4vw,3rem);display:grid;grid-template-columns:repeat(6,1fr);gap:.2rem;background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:.5rem;box-shadow:0 8px 30px #0006;z-index:5}
+.sp button{font-size:1.8rem;background:none;border:0;cursor:pointer;border-radius:8px;padding:.1rem .3rem}.sp button:hover{background:var(--sf2)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:grid;place-items:center;z-index:20;cursor:zoom-out}
+#lb img{max-width:94vw;max-height:86vh;border-radius:8px}
+#lb .bar{position:absolute;top:1rem;right:1rem;display:flex;gap:.5rem}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.2s}
+@media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -140,12 +154,16 @@ input[type=color]{width:3rem;height:2.4rem;padding:.15rem;cursor:pointer}
     <div id="body"></div>
     <form id="composer" hidden>
       <button id="pick" type="button" aria-label="+">+</button>
+      <button id="stb" type="button" aria-label="Sticker">☺</button>
+      <div class="sp" id="sp" hidden></div>
       <input id="file" type="file" multiple hidden>
       <textarea id="draft" rows="1" data-ph="msg"></textarea>
       <button class="btn" type="submit" id="send" data-i="send"></button>
     </form>
   </main>
 </div>
+<div id="lb" hidden></div>
+<input id="af" type="file" accept="image/*" hidden>
 <p id="toast" role="status" aria-live="polite"></p>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -201,20 +219,37 @@ setuph|Teman mencarimu lewat username. 3 sampai 20 huruf kecil, angka, atau _|Fr
 save|Simpan|Save|保存
 taken|Username sudah dipakai|Username is taken|このユーザー名は使われています
 badname|Format username tidak valid|Invalid username format|ユーザー名の形式が正しくありません
-up|Mengunggah|Uploading|アップロード中`;
+up|Mengunggah|Uploading|アップロード中
+newreq|Permintaan berteman dari|Friend request from|友だちリクエスト:
+bub|Gaya balon|Bubble style|吹き出しスタイル
+b_round|Bulat|Round|丸
+b_sharp|Kotak|Square|四角
+b_soft|Lonjong|Pill|カプセル
+mine|Warna balon saya|My bubble color|自分の吹き出し色
+prof|Profil|Profile|プロフィール
+dname|Nama tampilan|Display name|表示名
+bio|Bio|Bio|自己紹介
+avatar|Ganti foto|Change photo|写真を変更
+gifonly|GIF hanya untuk admin|GIF is admin only|GIFは管理者のみ
+adm|Kode admin|Admin code|管理者コード
+admok|Kamu sekarang admin|You are now an admin|管理者になりました
+admbad|Kode salah atau sudah dipakai|Wrong or used code|コードが無効です
+saved|Tersimpan|Saved|保存しました`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
 
 const ink=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*299+(n>>8&255)*587+(n&255)*114)/1000>150?'#000':'#fff'};
-function applyTheme(){const d=document.documentElement,a=pref('accent');d.dataset.theme=pref('theme')||'black';if(a){d.style.setProperty('--accent',a);d.style.setProperty('--on',ink(a))}else{d.style.removeProperty('--accent');d.style.removeProperty('--on')}}
+function applyTheme(){const d=document.documentElement,a=pref('accent');d.dataset.theme=pref('theme')||'black';d.dataset.bub=pref('bub')||'round';const mi=pref('mine');if(mi){d.style.setProperty('--mine',mi);d.style.setProperty('--mon',ink(mi))}else{d.style.removeProperty('--mine');d.style.removeProperty('--mon')}if(a){d.style.setProperty('--accent',a);d.style.setProperty('--on',ink(a))}else{d.style.removeProperty('--accent');d.style.removeProperty('--on')}}
 
-const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},mf:'all'};
+const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
 const TABS=['chats','media','friends','settings'];
 const peerOf=m=>m.sender_id===S.me?m.recipient_id:m.sender_id;
-const name=id=>id===S.me?t('me'):'@'+(S.pf[id]||'?');
+const name=id=>id===S.me?t('me'):((S.pp[id]||{}).display_name||'@'+(S.pf[id]||'?'));
+const vt=f=>document.startViewTransition?document.startViewTransition(f):f();
+const av=id=>{const p=S.pp[id]||{},e=h('span',{class:'av'});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();return e};
 const other=f=>f.requester===S.me?f.addressee:f.requester;
 const friends=()=>S.fr.filter(f=>f.status==='accepted').map(other);
 const isImg=n=>/\.(jpe?g|png|gif|webp|avif)$/i.test(n);
@@ -238,30 +273,32 @@ $('sform').onsubmit=async e=>{e.preventDefault();const username=$('un').value.tr
   if(!/^[a-z0-9_]{3,20}$/.test(username)){$('se').textContent=t('badname');return}
   const{error}=await sb.from('profiles').insert({id:S.me,username});
   if(error){$('se').textContent=error.code==='23505'?t('taken'):error.message;return}
-  S.prof={id:S.me,username};S.pf[S.me]=username;enter()};
+  S.prof={id:S.me,username,is_admin:false};S.pf[S.me]=username;S.pp[S.me]=S.prof;enter()};
 
 sb.auth.onAuthStateChange((_e,session)=>setTimeout(()=>boot(session),0));
 async function boot(session){
   const uid=session&&session.user.id;
   if(uid&&uid===S.me)return;
   if(ch){sb.removeChannel(ch);ch=null}
-  Object.assign(S,{me:uid||null,prof:null,msgs:[],fr:[],pf:{},peer:null,tab:'chats'});seen.clear();imgs.clear();primed=false;
+  Object.assign(S,{me:uid||null,prof:null,msgs:[],fr:[],pf:{},pp:{},peer:null,tab:'chats'});seen.clear();imgs.clear();primed=false;
   if(!uid){show('auth');return}
   const{data}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();
   if(!data){show('setup');return}
-  S.prof=data;S.pf[uid]=data.username;enter();
+  S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;enter();
 }
 function enter(){show('app');S.peer=wide()?S.me:null;render();loadAll();
   ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).subscribe()}
 
 /* ---- data ---- */
 async function loadAll(){
+  const before=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).map(f=>f.id);
   const[m,f]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*')]);
   if(m.error||f.error){toast((m.error||f.error).message);return}
   S.msgs=m.data.reverse();S.fr=f.data;
   const ids=new Set();S.msgs.forEach(x=>{ids.add(x.sender_id);ids.add(x.recipient_id)});S.fr.forEach(x=>{ids.add(x.requester);ids.add(x.addressee)});
-  const need=[...ids].filter(i=>!S.pf[i]);
-  if(need.length){const p=await sb.from('profiles').select('id,username').in('id',need);(p.data||[]).forEach(r=>S.pf[r.id]=r.username)}
+  const need=[...ids];
+  if(need.length){const p=await sb.from('profiles').select('id,username,display_name,bio,avatar_url,is_admin').in('id',need);(p.data||[]).forEach(r=>{S.pf[r.id]=r.username;S.pp[r.id]=r})}
+  if(primed)S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me&&!before.includes(f.id)).forEach(f=>toast(t('newreq')+' '+name(f.requester)));
   if(S.peer&&S.peer!==S.me&&!friends().includes(S.peer))S.peer=null;
   render();S.msgs.forEach(x=>seen.add(x.id));primed=true;
 }
@@ -274,7 +311,7 @@ const openLink=u=>{if(/^https?:\/\//i.test(u))window.open(u,'_blank','noopener,n
 function render(){
   document.body.dataset.tab=S.tab;document.body.classList.toggle('open',S.tab==='chats'&&!!S.peer);
   const pend=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).length;
-  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),onclick:()=>{S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k!=='chats')S.peer=null;render()}},t(k),k==='friends'&&pend?h('i',{class:'dot'},pend):null)));
+  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),onclick:()=>{S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k!=='chats')S.peer=null;vt(render)}},t(k),k==='friends'&&pend?h('i',{class:'dot'},pend):null)));
   renderSide();
   const chat=S.tab==='chats'&&S.peer;$('composer').hidden=!chat;$('chead').hidden=!chat;
   if(S.tab==='chats')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
@@ -283,18 +320,19 @@ function render(){
 function renderSide(){
   const last=id=>S.msgs.filter(m=>peerOf(m)===id).pop();
   const ids=[S.me,...friends()].sort((a,b)=>((last(b)||{}).created_at||'').localeCompare((last(a)||{}).created_at||''));
-  $('side').replaceChildren(h('h2',{},t('chats')),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':''),onclick:()=>{S.peer=id;$('draft').value='';render()}},h('span',{class:'av'},name(id).replace('@','')[0].toUpperCase()),h('span',{class:'cm'},h('b',{},name(id)),h('small',{},l?preview(l):t('empty'))),l?h('time',{},hm(l.created_at)):null)}));
+  $('side').replaceChildren(h('h2',{},t('chats')),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':''),onclick:()=>{S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},h('b',{},name(id)),h('small',{},l?preview(l):t('empty'))),l?h('time',{},hm(l.created_at)):null)}));
 }
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
 function bubble(m){
   const mine=m.sender_id===S.me,c=[];
-  if(m.kind==='file'){if(isImg(m.content))c.push(imgEl(m,'pic'));c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
+  if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
+  else if(m.kind==='sticker')c.push(h('span',{class:'stk'},m.content));
   else if(m.kind==='link'&&/^https?:\/\//i.test(m.content))c.push(h('a',{href:m.content,target:'_blank',rel:'noopener noreferrer'},m.content));
   else c.push(h('span',{class:'tx'},m.content));
-  return h('div',{class:'row '+(mine?'me':'you')},h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')},...c,h('time',{},hm(m.created_at)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
+  return h('div',{class:'row '+(mine?'me':'you')},h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')+(m.kind==='sticker'?' st':'')},...c,h('time',{},hm(m.created_at)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
 }
 function renderChat(){
-  $('chead').replaceChildren(h('button',{class:'back','aria-label':'back',onclick:()=>{S.peer=null;render()}},'‹'),h('b',{},name(S.peer)));
+  $('chead').replaceChildren(h('button',{class:'back','aria-label':'back',onclick:()=>{S.peer=null;render()}},'‹'),av(S.peer),h('span',{class:'cm'},h('b',{},name(S.peer)),h('small',{style:'color:var(--mut)'},(S.pp[S.peer]||{}).bio||'')));
   const bd=$('body'),near=bd.scrollHeight-bd.scrollTop-bd.clientHeight<140||bd.dataset.p!==S.peer;
   bd.className='msgs';bd.dataset.p=S.peer;
   bd.replaceChildren(...S.msgs.filter(m=>peerOf(m)===S.peer).map(bubble));
@@ -304,12 +342,12 @@ function renderMedia(){
   const bd=$('body');bd.className='pane';
   const items=S.msgs.filter(m=>m.kind!=='text'&&(S.mf==='all'||m.kind===S.mf)).reverse();
   bd.replaceChildren(h('h2',{},t('media')),h('div',{class:'chips'},...['all','file','link'].map(k=>h('button',{class:'chip'+(S.mf===k?' on':''),onclick:()=>{S.mf=k;render()}},t('m_'+k)))),
-    items.length?h('div',{class:'grid'},...items.map(m=>h('button',{class:'mc',onclick:()=>m.kind==='file'?dl(m):openLink(m.content)},m.kind==='file'&&isImg(m.content)?imgEl(m,''):null,h('b',{},m.content),h('small',{},name(peerOf(m))+', '+hm(m.created_at))))):h('p',{class:'empty'},t('nomedia')));
+    items.length?h('div',{class:'grid'},...items.map(m=>h('button',{class:'mc',onclick:()=>m.kind==='file'?(isImg(m.content)?openImg(m):dl(m)):openLink(m.content)},m.kind==='file'&&isImg(m.content)?imgEl(m,''):null,h('b',{},m.content),h('small',{},name(peerOf(m))+', '+hm(m.created_at))))):h('p',{class:'empty'},t('nomedia')));
 }
 function renderFriends(){
   const bd=$('body'),keep=($('fu')||{}).value||'';bd.className='pane';
   const inc=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me),out=S.fr.filter(f=>f.status==='pending'&&f.requester===S.me),ok=S.fr.filter(f=>f.status==='accepted');
-  const row=(f,...b)=>h('div',{class:'frow'},h('b',{},'@'+(S.pf[other(f)]||'?')),h('span',{class:'acts'},...b));
+  const row=(f,...b)=>h('div',{class:'frow'},h('span',{class:'who'},av(other(f)),h('b',{},name(other(f)))),h('span',{class:'acts'},...b));
   const rm=(f,l)=>h('button',{class:'ghost',onclick:()=>frDo(f)},t(l));
   bd.replaceChildren(...[h('h2',{},t('friends')),
     h('form',{class:'add',onsubmit:addFriend},h('input',{id:'fu',placeholder:t('addph'),autocapitalize:'none',autocomplete:'off',required:true}),h('button',{class:'btn'},t('request'))),
@@ -328,10 +366,19 @@ function renderSettings(){
   const bd=$('body');bd.className='pane';
   const seg=(items,cur,fn)=>h('div',{class:'seg'},...items.map(([v,l])=>h('button',{class:cur===v?'on':'',onclick:()=>fn(v)},l)));
   const cur=pref('theme')||'black';
-  bd.replaceChildren(h('h2',{},t('settings')),h('p',{},h('b',{},'@'+S.prof.username)),
+  const prof=h('div',{class:'set'},h('p',{},t('prof')),h('div',{class:'who'},av(S.me),h('button',{class:'ghost',onclick:()=>$('af').click()},t('avatar')),S.prof.is_admin?h('b',{},'★ Admin'):h('span')),
+    h('input',{id:'dn',value:S.prof.display_name||'',placeholder:t('dname'),maxlength:30,style:'margin-top:.6rem'}),
+    h('input',{id:'bi',value:S.prof.bio||'',placeholder:t('bio'),maxlength:140,style:'margin-top:.5rem'}),
+    h('button',{class:'btn sm',style:'margin-top:.5rem',onclick:saveProf},t('save')));
+  const bub=h('div',{class:'set'},h('p',{},t('bub')),seg([['round',t('b_round')],['sharp',t('b_sharp')],['soft',t('b_soft')]],pref('bub')||'round',v=>{pref('bub',v);applyTheme();render()}),
+    h('p',{},t('mine')),h('div',{class:'acts'},h('input',{type:'color',value:pref('mine')||'#7f9bff',oninput:e=>{pref('mine',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('mine',null);applyTheme();render()}},t('reset'))));
+  const adm=S.prof.is_admin?h('span'):h('div',{class:'set'},h('p',{},t('adm')),h('div',{class:'add'},h('input',{id:'ac',type:'password',autocomplete:'off'}),h('button',{class:'btn sm',onclick:redeem},t('save'))));
+  bd.replaceChildren(h('h2',{},t('settings')),h('p',{},h('b',{},'@'+S.prof.username)),prof,
     h('div',{class:'set'},h('p',{},t('theme')),seg([['black',t('th_black')],['dark',t('th_dark')],['light',t('th_light')]],cur,v=>{pref('theme',v);applyTheme();render()})),
     h('div',{class:'set'},h('p',{},t('accent')),h('div',{class:'acts'},h('input',{type:'color',value:pref('accent')||'#7f9bff',oninput:e=>{pref('accent',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('accent',null);applyTheme();render()}},t('reset')))),
+    bub,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
+    adm,
     h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')));
 }
 
@@ -353,6 +400,27 @@ $('file').onchange=async e=>{const fs=[...e.target.files],to=S.peer;e.target.val
     if(r.error){await sb.storage.from(BUCKET).remove([p]);toast(r.error.message)}
   }
   loadAll()};
+
+/* ---- foto layar penuh, profil, admin, stiker ---- */
+async function openImg(m){const u=imgs.get(m.id)||await signed(m.file_path);if(!u)return;const lb=$('lb'),close=()=>{lb.hidden=true;lb.replaceChildren()};
+  lb.replaceChildren(h('img',{src:u,alt:m.content,onclick:e=>e.stopPropagation()}),h('div',{class:'bar'},h('button',{class:'btn sm',onclick:e=>{e.stopPropagation();dl(m)}},t('dl')),h('button',{class:'btn sm',onclick:close},'×')));lb.onclick=close;lb.hidden=false}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lb').hidden)$('lb').click()});
+async function saveProf(){const display_name=$('dn').value.trim()||null,bio=$('bi').value.trim()||null;
+  const{error}=await sb.from('profiles').update({display_name,bio}).eq('id',S.me);if(error)return toast(error.message);
+  Object.assign(S.prof,{display_name,bio});S.pp[S.me]=S.prof;toast(t('saved'));render()}
+$('af').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(ext==='gif'&&!S.prof.is_admin)return toast(t('gifonly'));
+  const p=S.me+'/'+Date.now()+'.'+ext;
+  const u=await sb.storage.from('avatars').upload(p,f,{contentType:f.type||'image/png'});if(u.error)return toast(u.error.message);
+  const url=sb.storage.from('avatars').getPublicUrl(p).data.publicUrl;
+  const{error}=await sb.from('profiles').update({avatar_url:url}).eq('id',S.me);if(error)return toast(error.message);
+  S.prof.avatar_url=url;S.pp[S.me]=S.prof;render()};
+async function redeem(){const{data,error}=await sb.rpc('redeem_admin_code',{code:$('ac').value.trim()});
+  if(error||!data)return toast(t('admbad'));S.prof.is_admin=true;S.pp[S.me]=S.prof;toast(t('admok'));render()}
+const STK=['😀','😂','🥹','😍','😎','🤔','😭','😡','👍','👏','🙏','🔥','🎉','❤️','💀','🤝','😴','🤯','🥳','😅','🫡','💯','✨','🍕'];
+$('sp').replaceChildren(...STK.map(x=>h('button',{type:'button',onclick:async()=>{$('sp').hidden=true;if(!S.peer)return;const{error}=await sb.from('messages').insert({recipient_id:S.peer,kind:'sticker',content:x});error?toast(error.message):loadAll()}},x)));
+$('stb').onclick=()=>{$('sp').hidden=!$('sp').hidden};
 
 applyTheme();applyLang();
 </script>
