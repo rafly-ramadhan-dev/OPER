@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --ink:#14213d; --muted:#5b6b82; --line:#d5dde8;
+  --accent:#2b50ff; --accent-ink:#ffffff; --teal:#0a7d6b; --danger:#c2362b;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0e1524; --surface:#16203a; --ink:#e8eefc; --muted:#98a6c3; --line:#26335a;
+         --accent:#7f9bff; --accent-ink:#0e1524; --teal:#4fd1b5; --danger:#ff8a80; }
+}
+*{ box-sizing:border-box; }
+html{ background:var(--bg); }
+body{ margin:0; font:400 1rem/1.55 var(--body); color:var(--ink); background:var(--bg); min-height:100vh; }
+main{ max-width:40rem; margin:0 auto; padding:1.5rem 1.25rem 4rem; }
+[hidden]{ display:none !important; }
+:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+.top{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.75rem; }
+.brand{ font:800 1.75rem/1 var(--display); letter-spacing:-.02em; margin:0; }
+#who{ display:flex; align-items:center; gap:.75rem; min-width:0; color:var(--muted); font-size:.9rem; }
+#email-label{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.btn{ font:600 .95rem var(--body); border:0; border-radius:10px; padding:.65rem 1.2rem; cursor:pointer;
+      background:var(--accent); color:var(--accent-ink); }
+.btn:disabled{ opacity:.55; cursor:default; }
+.ghost{ font:500 .85rem var(--body); background:transparent; color:var(--muted); border:1px solid var(--line);
+        border-radius:8px; padding:.3rem .7rem; cursor:pointer; text-decoration:none; display:inline-block; }
+.ghost:hover{ color:var(--ink); border-color:var(--muted); }
+.ghost.danger:hover{ color:var(--danger); border-color:var(--danger); }
+
+.tray{ background:var(--surface); border:2px solid var(--ink); border-radius:14px; box-shadow:6px 6px 0 var(--accent); padding:1rem; }
+.tray h1,.tray h2{ font:800 1.35rem/1.2 var(--display); margin:0 0 .75rem; letter-spacing:-.01em; }
+textarea,input{ width:100%; font:400 1.05rem/1.5 var(--body); color:var(--ink); background:transparent;
+                border:1px solid var(--line); border-radius:10px; padding:.7rem .8rem; }
+textarea{ min-height:7rem; resize:vertical; }
+label{ display:block; font-weight:600; font-size:.9rem; margin:.75rem 0 .25rem; }
+.row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.75rem; }
+.hint{ color:var(--muted); font-size:.85rem; margin:0; }
+.err{ color:var(--danger); font-size:.9rem; min-height:1.3rem; margin:.6rem 0 0; }
+.switch{ background:none; border:0; padding:0; color:var(--accent); font:500 .9rem var(--body); cursor:pointer; text-decoration:underline; }
+
+.list-head{ font:800 1.15rem var(--display); margin:2.5rem 0 .5rem; }
+#list{ list-style:none; margin:0; padding:0; }
+.item{ display:flex; justify-content:space-between; gap:1rem; padding:.9rem 0 .9rem .9rem; border-left:4px solid var(--accent); border-bottom:1px solid var(--line); }
+.item.link{ border-left-color:var(--teal); }
+.body{ min-width:0; }
+.content{ margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.meta{ color:var(--muted); font-size:.8rem; }
+.acts{ display:flex; flex-wrap:wrap; gap:.4rem; align-content:flex-start; justify-content:flex-end; flex-shrink:0; }
+.empty{ color:var(--muted); padding:1rem 0; }
+
+#toast{ position:fixed; left:50%; bottom:1.25rem; transform:translate(-50%,1rem); background:var(--ink); color:var(--bg);
+        padding:.6rem 1rem; border-radius:10px; font-size:.9rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:90vw; }
+#toast.show{ opacity:1; transform:translate(-50%,0); }
+@media (prefers-reduced-motion:reduce){ #toast{ transition:none; } }
+@media (max-width:30rem){ .item{ flex-direction:column; } .acts{ justify-content:flex-start; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <p class="brand">Oper</p>
+    <div id="who" hidden>
+      <span id="email-label"></span>
+      <button class="ghost" id="logout" type="button">Keluar</button>
+    </div>
+  </header>
+
+  <section id="auth" class="tray" hidden>
+    <h1 id="auth-title">Masuk ke Oper</h1>
+    <p class="hint">Kirim teks dan link dari HP ke PC, atau sebaliknya.</p>
+    <form id="auth-form">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <label for="password">Kata sandi</label>
+      <input id="password" type="password" minlength="6" autocomplete="current-password" required>
+      <p class="err" id="auth-error" role="alert"></p>
+      <div class="row">
+        <button type="button" class="switch" id="auth-switch">Belum punya akun? Daftar</button>
+        <button class="btn" id="auth-submit" type="submit">Masuk</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <form id="compose" class="tray">
+      <h2>Kirim ke perangkat lain</h2>
+      <label for="draft" class="sr" style="position:absolute;left:-9999px">Teks atau link</label>
+      <textarea id="draft" placeholder="Tempel teks atau link di sini"></textarea>
+      <div class="row">
+        <p class="hint">Ctrl+Enter untuk kirim</p>
+        <button class="btn" id="send" type="submit">Kirim</button>
+      </div>
+    </form>
+
+    <h2 class="list-head">Kotak masuk</h2>
+    <ul id="list"></ul>
+    <p class="empty" id="empty" hidden>Belum ada kiriman. Tempel teks atau link di atas, lalu buka Oper di perangkat lain untuk melihatnya.</p>
+  </section>
+</main>
+<p id="toast" role="status" aria-live="polite"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+// Isi dua nilai ini dari Supabase: Project Settings > API
+const SUPABASE_URL = 'https://nykmahodzdlmxcmmfdws.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9S57J0ZN9FHp_XqBOrMFEw_zjcDrmfX';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let mode = 'login', channel = null, currentUser = null;
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function setMode(m){
+  mode = m;
+  const login = m === 'login';
+  $('auth-title').textContent = login ? 'Masuk ke Oper' : 'Buat akun Oper';
+  $('auth-submit').textContent = login ? 'Masuk' : 'Daftar';
+  $('auth-switch').textContent = login ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk';
+  $('password').autocomplete = login ? 'current-password' : 'new-password';
+  $('auth-error').textContent = '';
+}
+$('auth-switch').addEventListener('click', () => setMode(mode === 'login' ? 'signup' : 'login'));
+
+$('auth-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('email').value.trim(), password = $('password').value;
+  const btn = $('auth-submit'); btn.disabled = true; $('auth-error').textContent = '';
+  const { data, error } = mode === 'login'
+    ? await sb.auth.signInWithPassword({ email, password })
+    : await sb.auth.signUp({ email, password });
+  btn.disabled = false;
+  if (error) { $('auth-error').textContent = error.message; return; }
+  if (mode === 'signup' && !data.session) {
+    setMode('login');
+    $('auth-error').textContent = 'Akun dibuat. Cek email untuk konfirmasi, lalu masuk.';
+  }
+});
+$('logout').addEventListener('click', () => sb.auth.signOut());
+
+sb.auth.onAuthStateChange((_event, session) => setTimeout(() => show(session), 0));
+
+function show(session){
+  const uid = session ? session.user.id : null;
+  if (uid && uid === currentUser && channel) return;
+  currentUser = uid;
+  if (channel) { sb.removeChannel(channel); channel = null; }
+  $('auth').hidden = !!uid; $('app').hidden = !uid; $('who').hidden = !uid;
+  if (uid) {
+    $('email-label').textContent = session.user.email;
+    load();
+    channel = sb.channel('items-' + uid)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, load)
+      .subscribe();
+  } else {
+    $('list').replaceChildren();
+  }
+}
+
+async function load(){
+  const { data, error } = await sb.from('items').select('*').order('created_at', { ascending: false }).limit(100);
+  if (error) { toast('Gagal memuat: ' + error.message); return; }
+  render(data);
+}
+
+const fmt = iso => new Date(iso).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); toast('Tersalin'); }
+  catch { toast('Tidak bisa menyalin otomatis. Tahan teksnya lalu salin manual.'); }
+}
+
+function render(items){
+  const list = $('list'); list.replaceChildren();
+  $('empty').hidden = items.length > 0;
+  for (const it of items) {
+    const li = document.createElement('li'); li.className = 'item ' + it.kind;
+    const body = document.createElement('div'); body.className = 'body';
+    const p = document.createElement('p'); p.className = 'content'; p.textContent = it.content;
+    const meta = document.createElement('span'); meta.className = 'meta';
+    meta.textContent = (it.kind === 'link' ? 'Link, ' : 'Teks, ') + fmt(it.created_at);
+    body.append(p, meta);
+
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const copy = document.createElement('button'); copy.className = 'ghost'; copy.type = 'button'; copy.textContent = 'Salin';
+    copy.addEventListener('click', () => copyText(it.content));
+    acts.append(copy);
+    if (it.kind === 'link') {
+      const open = document.createElement('a'); open.className = 'ghost'; open.textContent = 'Buka';
+      open.href = it.content; open.target = '_blank'; open.rel = 'noopener noreferrer';
+      acts.append(open);
+    }
+    const del = document.createElement('button'); del.className = 'ghost danger'; del.type = 'button'; del.textContent = 'Hapus';
+    del.addEventListener('click', async () => {
+      const { error } = await sb.from('items').delete().eq('id', it.id);
+      if (error) toast('Gagal hapus: ' + error.message); else load();
+    });
+    acts.append(del);
+
+    li.append(body, acts); list.append(li);
+  }
+}
+
+$('compose').addEventListener('submit', async e => {
+  e.preventDefault();
+  const content = $('draft').value.trim();
+  if (!content) return;
+  const kind = /^https?:\/\/\S+$/i.test(content) ? 'link' : 'text';
+  $('send').disabled = true;
+  const { error } = await sb.from('items').insert({ content, kind });
+  $('send').disabled = false;
+  if (error) { toast('Gagal kirim: ' + error.message); return; }
+  $('draft').value = '';
+  toast(kind === 'link' ? 'Link terkirim' : 'Teks terkirim');
+  load();
+});
+$('draft').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('compose').requestSubmit();
+});
+</script>
+</body>
+</html>
