@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Oper</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
@@ -234,7 +238,8 @@ gifonly|GIF hanya untuk admin|GIF is admin only|GIFは管理者のみ
 adm|Kode admin|Admin code|管理者コード
 admok|Kamu sekarang admin|You are now an admin|管理者になりました
 admbad|Kode salah atau sudah dipakai|Wrong or used code|コードが無効です
-saved|Tersimpan|Saved|保存しました`;
+saved|Tersimpan|Saved|保存しました
+install|Pasang aplikasi|Install app|アプリをインストール`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -372,13 +377,14 @@ function renderSettings(){
     h('button',{class:'btn sm',style:'margin-top:.5rem',onclick:saveProf},t('save')));
   const bub=h('div',{class:'set'},h('p',{},t('bub')),seg([['round',t('b_round')],['sharp',t('b_sharp')],['soft',t('b_soft')]],pref('bub')||'round',v=>{pref('bub',v);applyTheme();render()}),
     h('p',{},t('mine')),h('div',{class:'acts'},h('input',{type:'color',value:pref('mine')||'#7f9bff',oninput:e=>{pref('mine',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('mine',null);applyTheme();render()}},t('reset'))));
+  const inst=ip?h('div',{class:'set'},h('button',{class:'btn',onclick:async()=>{ip.prompt();await ip.userChoice;ip=null;render()}},t('install'))):h('span');
   const adm=S.prof.is_admin?h('span'):h('div',{class:'set'},h('p',{},t('adm')),h('div',{class:'add'},h('input',{id:'ac',type:'password',autocomplete:'off'}),h('button',{class:'btn sm',onclick:redeem},t('save'))));
   bd.replaceChildren(h('h2',{},t('settings')),h('p',{},h('b',{},'@'+S.prof.username)),prof,
     h('div',{class:'set'},h('p',{},t('theme')),seg([['black',t('th_black')],['dark',t('th_dark')],['light',t('th_light')]],cur,v=>{pref('theme',v);applyTheme();render()})),
     h('div',{class:'set'},h('p',{},t('accent')),h('div',{class:'acts'},h('input',{type:'color',value:pref('accent')||'#7f9bff',oninput:e=>{pref('accent',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('accent',null);applyTheme();render()}},t('reset')))),
     bub,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
-    adm,
+    inst,adm,
     h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')));
 }
 
@@ -422,6 +428,9 @@ const STK=['😀','😂','🥹','😍','😎','🤔','😭','😡','👍','👏'
 $('sp').replaceChildren(...STK.map(x=>h('button',{type:'button',onclick:async()=>{$('sp').hidden=true;if(!S.peer)return;const{error}=await sb.from('messages').insert({recipient_id:S.peer,kind:'sticker',content:x});error?toast(error.message):loadAll()}},x)));
 $('stb').onclick=()=>{$('sp').hidden=!$('sp').hidden};
 
+let ip=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 applyTheme();applyLang();
 </script>
 </body>
