@@ -177,6 +177,14 @@ body[data-tab=global] .back{display:none!important}
 .sp{max-height:20rem;overflow:auto;width:min(22rem,calc(100vw - 2rem))}
 .sp img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
 @media(prefers-reduced-motion:reduce){.tb i,.fdr{animation:none!important}}
+.mt{color:var(--accent)}.row.me .mt{color:inherit;text-decoration:underline}.mt.me{background:rgba(127,127,127,.25);border-radius:5px;padding:0 .2rem}
+.mpl{position:absolute;bottom:calc(100% + .4rem);left:clamp(1rem,4vw,3rem);background:var(--sf);border:1px solid var(--line);border-radius:12px;padding:.3rem;display:grid;min-width:12rem;z-index:5}
+.mpl button{background:none;border:0;text-align:left;padding:.45rem .7rem;border-radius:8px;cursor:pointer}.mpl button:hover{background:var(--sf2)}
+#rp{padding:.5rem clamp(1rem,4vw,3rem);border-top:1px solid var(--line);background:var(--bg);position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+#rp .q{border-left:3px solid var(--accent);padding-left:.6rem;min-width:0}#rp b,#rp small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qt{border-left:3px solid currentColor;background:rgba(127,127,127,.2);border-radius:6px;padding:.25rem .5rem;margin-bottom:.3rem;font-size:.85rem}
+.qt b{display:block}.qt span{display:block;max-height:2.6em;overflow:hidden;opacity:.85}
+.nl{margin:.2rem 0 .6rem;padding-left:1.1rem;display:grid;gap:.4rem}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -220,10 +228,12 @@ body[data-tab=global] .back{display:none!important}
   <main id="main">
     <header id="chead" hidden></header>
     <div id="body"></div>
+    <div id="rp" hidden></div>
     <form id="composer" hidden>
       <button id="pick" type="button" aria-label="+">+</button>
       <button id="stb" type="button" aria-label="Sticker">☺</button>
       <div class="sp" id="sp" hidden></div>
+      <div class="mpl" id="mp" hidden></div>
       <input id="file" type="file" multiple hidden>
       <textarea id="draft" rows="1" data-ph="msg"></textarea>
       <button class="btn" type="submit" id="send" data-i="send"></button>
@@ -355,7 +365,15 @@ typing|sedang mengetik...|is typing...|入力中...
 disc|Temukan orang|Find people|ユーザーを探す
 grp|Grup|Group|グループ
 mkadm|Jadikan admin|Make admin|管理者にする
-unadm|Cabut admin|Remove admin|管理者を外す`;
+unadm|Cabut admin|Remove admin|管理者を外す
+news|Yang baru di Oper|What's new in Oper|Operの新機能
+ver|Versi|Version|バージョン
+ok|Oke|OK|OK
+seenews|Lihat pembaruan|See what's new|更新内容を見る
+reply|Balas|Reply|返信
+allonly|Hanya admin yang boleh @semua di Global|Only admins can use @all in Global|グローバルで@allを使えるのは管理者のみ
+today|hari ini|today|今日
+yday|kemarin|yesterday|昨日`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -366,6 +384,16 @@ function applyTheme(){const d=document.documentElement,a=pref('accent');d.datase
 const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
+const VER='0.12';
+const CL={'0.12':`Tag @orang di grup dan Global, @semua untuk semua anggota (di Global hanya admin)|Mention @people in groups and Global, @all for every member (admins only in Global)|グループとグローバルで@メンション、@allは全員宛（グローバルは管理者のみ）
+Balas pesan di obrolan pribadi, grup, dan Global|Reply to messages in chats, groups and Global|個人チャット・グループ・グローバルでメッセージに返信
+Terakhir aktif ala WhatsApp (hari ini, kemarin)|WhatsApp-style last seen (today, yesterday)|WhatsApp風の最終オンライン表示
+Pop up daftar pembaruan|What's new pop-up|更新情報ポップアップ`,
+'0.11':`Tab Global untuk obrolan terbuka|Global tab for open chat|オープンチャット用グローバルタブ
+Temukan orang dan profil dengan jumlah teman|Find people and profiles with friend counts|ユーザー検索と友だち数付きプロフィール
+Pesan dihapus, sedang mengetik, badge Founder dan Grup|Deleted messages, typing bubble, Founder and Group badges|削除表示・入力中バブル・Founderとグループのバッジ
+Stiker foto dari admin|Photo stickers from admins|管理者のフォトスタンプ`};
+const cmpV=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){const d=(x[i]||0)-(y[i]||0);if(d)return d}return 0};
 const TABS=['chats','global','media','friends','settings'];
 const GID='00000000-0000-0000-0000-0000000000a1',GK='g:'+GID,PF='id,username,display_name,bio,avatar_url,is_admin,name_color,name_fx,frame,last_seen,is_founder';
 const isG=id=>typeof id==='string'&&id.startsWith('g:');
@@ -400,7 +428,7 @@ $('sform').onsubmit=async e=>{e.preventDefault();const username=$('un').value.tr
   if(!/^[a-z0-9_]{3,20}$/.test(username)){$('se').textContent=t('badname');return}
   const{error}=await sb.from('profiles').insert({id:S.me,username});
   if(error){$('se').textContent=error.code==='23505'?t('taken'):error.message;return}
-  S.prof={id:S.me,username,is_admin:false};S.pf[S.me]=username;S.pp[S.me]=S.prof;enter()};
+  S.prof={id:S.me,username,is_admin:false};S.pf[S.me]=username;S.pp[S.me]=S.prof;pref('ver',VER);enter()};
 
 sb.auth.onAuthStateChange((_e,session)=>setTimeout(()=>boot(session),0));
 async function boot(session){
@@ -414,7 +442,7 @@ async function boot(session){
   if(!data){show('setup');return}
   S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;enter();
 }
-function enter(){show('app');S.peer=wide()?S.me:null;render();loadAll();
+function enter(){show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);
   ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'groups'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'group_members'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'stories'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'story_views'},loadAll).subscribe();
   pc=sb.channel('online',{config:{presence:{key:S.me}}});
   pc.on('presence',{event:'sync'},()=>{S.on=new Set(Object.keys(pc.presenceState()));if(S.tab!=='settings')render()}).on('broadcast',{event:'typing'},({payload:p})=>{if(!p||p.from===S.me)return;const k=isG(p.to)?p.to:p.from;if(isG(p.to)?!S.gr.some(g=>'g:'+g.id===p.to):p.to!==S.me)return;S.ty[k]=Date.now();S.tyn[k]=p.from;if(S.tab==='chats')render();setTimeout(()=>{if(S.tab==='chats'&&!typing(k))render()},3600)}).subscribe(st=>{if(st==='SUBSCRIBED')pc.track({at:Date.now()})});touch();clearInterval(lsT);lsT=setInterval(()=>{if(!document.hidden)touch()},60000)}
@@ -447,20 +475,20 @@ function render(){
   const chat=(S.tab==='chats'&&S.peer)||S.tab==='global';$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');$('chead').style.cursor=S.peer&&S.peer!==S.me&&S.peer!==GK?'pointer':'';
   if(S.tab==='chats'||S.tab==='global')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
   else if(S.tab==='media')renderMedia();else if(S.tab==='friends')renderFriends();else renderSettings();
-  markRead();
+  drawRp(chat);markRead();
 }
 function renderSide(){
   const last=id=>S.msgs.filter(m=>peerOf(m)===id).pop();
   const ids=[S.me,...convs()].sort((a,b)=>((last(b)||{}).created_at||'').localeCompare((last(a)||{}).created_at||''));
-  $('side').replaceChildren(h('div',{class:'sh'},h('h2',{style:'margin:0;padding:0'},t('chats')),h('button',{class:'ghost',onclick:newGroup},'+ '+t('newgrp'))),storyBar(),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':'')+(unread(id)?' un':''),onclick:()=>{if(!wide()&&S.peer!==id)history.pushState({c:1},'');S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},typing(id)?t('typing'):l?preview(l):t('empty'))),l?h('span',{class:'rt'},h('time',{},hm(l.created_at)),unread(id)?h('span',{class:'ub'},unread(id)):null):null)}));
+  $('side').replaceChildren(h('div',{class:'sh'},h('h2',{style:'margin:0;padding:0'},t('chats')),h('button',{class:'ghost',onclick:newGroup},'+ '+t('newgrp'))),storyBar(),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':'')+(unread(id)?' un':''),onclick:()=>{if(!wide()&&S.peer!==id)history.pushState({c:1},'');S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},typing(id)?t('typing'):l?preview(l):t('empty'))),l?h('span',{class:'rt'},h('time',{},hm(l.created_at)),unread(id)?h('span',{class:'ub'},(menU(id)?'@ ':'')+unread(id)):null):null)}));
 }
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
 function bubble(m){
-  const mine=m.sender_id===S.me,c=[],g=!!m.group_id;if(g&&!mine)c.push(h('div',{class:'sn'},nm(m.sender_id)));
+  const mine=m.sender_id===S.me,c=[],g=!!m.group_id;if(g&&!mine)c.push(h('div',{class:'sn'},nm(m.sender_id)));if(m.reply_to&&!m.deleted_at)c.push(quoteEl(m));
   if(m.deleted_at)c.push(h('span',{class:'tx dl'},t('deleted')));else if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
   else if(m.kind==='sticker')c.push(/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(m.content)?h('img',{class:'stkimg',src:m.content,alt:''}):h('span',{class:'stk'},m.content));
   else if(m.kind==='link'&&/^https?:\/\//i.test(m.content))c.push(h('a',{href:m.content,target:'_blank',rel:'noopener noreferrer'},m.content));
-  else c.push(h('span',{class:'tx'},m.content));
+  else c.push(h('span',{class:'tx'},...mparts(m.content)));
   return h('div',{class:'row '+(mine?'me':'you')},g&&!mine?avc(m.sender_id):null,h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')+(m.kind==='sticker'?' st':''),oncontextmenu:e=>{e.preventDefault();msgMenu(m)}},...c,h('time',{},h('span',{class:'tt'},(m.edited_at?t('edited')+' ':'')+hm(m.created_at)),tick(m)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
 }
 function renderChat(){
@@ -515,14 +543,14 @@ function renderSettings(){
     bub,bgb,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
     inst,fxb,adm,usb,
-    h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')));
+    h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')),h('p',{style:'text-align:center;color:var(--mut);font-size:.85rem;margin-top:1rem'},'Oper v'+VER+' · ',h('button',{class:'link',onclick:()=>showNews('')},t('seenews'))));
 }
 
 /* ---- kirim ---- */
-$('composer').onsubmit=async e=>{e.preventDefault();const v=$('draft').value.trim();if(!v||!S.peer)return;$('draft').value='';
+$('composer').onsubmit=async e=>{e.preventDefault();const v=$('draft').value.trim();if(!v||!S.peer)return;if(S.peer===GK&&!S.prof.is_admin&&/@(semua|all)(?![a-z0-9_])/i.test(v))return toast(t('allonly'));$('draft').value='';
   const kind=/^https?:\/\/\S+$/i.test(v)?'link':'text';
-  const{error}=await sb.from('messages').insert({...tgt(),kind,content:v});
-  if(error){$('draft').value=v;toast(error.message)}else loadAll()};
+  const{error}=await sb.from('messages').insert({...tgt(),kind,content:v,reply_to:rid()});
+  if(error){$('draft').value=v;toast(error.message)}else{S.reply=null;loadAll()}};
 $('draft').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)){e.preventDefault();$('composer').requestSubmit()}});
 $('pick').onclick=()=>$('file').click();
 $('file').onchange=async e=>{const fs=[...e.target.files],to=S.peer;e.target.value='';
@@ -580,7 +608,7 @@ const convs=()=>[...friends(),...S.gr.filter(g=>g.id!==GID).map(g=>'g:'+g.id)];
 const unread=id=>{if(id===S.me)return 0;if(isG(id)){const g=id.slice(2),mm=S.gm.find(x=>x.group_id===g&&x.user_id===S.me);return mm?S.msgs.filter(m=>m.group_id===g&&m.sender_id!==S.me&&m.created_at>mm.last_read_at).length:0}return S.msgs.filter(m=>m.sender_id===id&&m.recipient_id===S.me&&!m.read_at).length};
 const tot=()=>convs().reduce((a,id)=>a+unread(id),0);
 const typing=id=>Date.now()-(S.ty[id]||0)<3500;
-const lastSeen=id=>S.on.has(id)?t('online'):(S.pp[id]||{}).last_seen?t('lastseen')+' '+hm((S.pp[id]).last_seen):'';
+const lastSeen=id=>{if(S.on.has(id))return t('online');const p=S.pp[id]||{};if(!p.last_seen)return'';const d=new Date(p.last_seen),dd=Math.round((new Date(new Date().toDateString())-new Date(d.toDateString()))/864e5);return t('lastseen')+' '+(dd<=0?t('today'):dd===1?t('yday'):d.toLocaleDateString(lang,{day:'numeric',month:'short'}))+' '+d.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})};
 const hdr=id=>typing(id)?(isG(id)?uname(S.tyn[id])+' ':'')+t('typing'):id===GK?t('globalh'):isG(id)?S.gm.filter(x=>x.group_id===id.slice(2)).map(x=>uname(x.user_id)).join(', '):(id!==S.me?lastSeen(id):'')||(S.pp[id]||{}).bio||'';
 const mk=new Set();
 function markRead(){if(S.tab!=='chats'||!S.peer||S.peer===S.me||document.hidden)return;
@@ -598,7 +626,7 @@ addEventListener('popstate',()=>{
 async function copyText(x){try{await navigator.clipboard.writeText(x);toast(t('copied'))}catch{toast('Error')}}
 function openDlg(n){const d=$('dlg');d.replaceChildren(n);d.hidden=false;d.onclick=e=>{if(e.target===d)closeDlg()}}
 function closeDlg(){const d=$('dlg');d.hidden=true;d.replaceChildren()}
-function msgMenu(m){if(m.deleted_at)return;const mine=m.sender_id===S.me,b=[];
+function msgMenu(m){if(m.deleted_at)return;const mine=m.sender_id===S.me,b=[['reply',()=>{S.reply={m,peer:S.peer};render();$('draft').focus()}]];
   if(m.kind==='text'||m.kind==='link')b.push(['copy',()=>copyText(m.content)]);
   if(m.kind==='file')b.push(['dl',()=>dl(m)]);
   if(mine&&m.kind==='text')b.push(['edit',()=>editMsg(m)]);
@@ -703,6 +731,24 @@ async function prof(id){if(id===S.me){S.tab='settings';S.peer=null;render();retu
   openDlg(h('div',{class:'mn'},h('div',{style:'display:grid;justify-items:center;gap:.25rem;text-align:center'},h('span',{class:'big'},av(id)),nmx(p,uname(id)),h('small',{style:'color:var(--mut)'},'@'+(S.pf[id]||'?')),p.bio?h('small',{},p.bio):h('span'),h('small',{style:'color:var(--mut)'},lastSeen(id))),
     btn,h('p',{style:'margin:.4rem 0 0;color:var(--mut);font-size:.9rem'},fl.length+' '+t('fcount')),
     ...fl.slice(0,40).map(i=>h('div',{class:'frow',style:'cursor:pointer',onclick:()=>prof(i)},h('span',{class:'who'},av(i),nmx(S.pp[i]||{},uname(i))))))) }
+const rid=()=>S.reply&&S.reply.peer===S.peer?S.reply.m.id:null;
+const qtext=q=>q.deleted_at?t('deleted'):q.kind==='file'?'📎 '+q.content:q.kind==='sticker'?'Sticker':q.content;
+const quoteEl=m=>{const q=S.msgs.find(x=>x.id===m.reply_to);return h('div',{class:'qt'},h('b',{},q?(q.sender_id===S.me?t('you'):uname(q.sender_id)):'…'),h('span',{},q?qtext(q):'…'))};
+function drawRp(chat){const r=S.reply&&S.reply.peer===S.peer?S.reply.m:null,rp=$('rp');rp.hidden=!(r&&chat);
+  if(r&&chat)rp.replaceChildren(h('div',{class:'q'},h('b',{},r.sender_id===S.me?t('you'):uname(r.sender_id)),h('small',{},qtext(r))),h('button',{class:'ghost',type:'button',onclick:()=>{S.reply=null;render()}},'×'))}
+const mentionsMe=c=>S.prof&&new RegExp('@('+S.prof.username+'|semua|all)(?![a-z0-9_])','i').test(c);
+const mparts=x=>x.split(/(@[a-z0-9_]{3,20})/gi).map(k=>/^@[a-z0-9_]{3,20}$/i.test(k)?h('b',{class:'mt'+(mentionsMe(k)?' me':'')},k):k);
+const menU=id=>{if(!isG(id)||id===GK)return false;const g=id.slice(2),mm=S.gm.find(x=>x.group_id===g&&x.user_id===S.me);return !!mm&&S.msgs.some(m=>m.group_id===g&&m.sender_id!==S.me&&m.created_at>mm.last_read_at&&!m.deleted_at&&mentionsMe(m.content))};
+function mCands(q){let ids=S.peer===GK?[...new Set(S.msgs.filter(m=>m.group_id===GID).map(m=>m.sender_id))]:S.gm.filter(x=>x.group_id===S.peer.slice(2)).map(x=>x.user_id);
+  const us=ids.filter(i=>i!==S.me).map(i=>S.pf[i]).filter(Boolean);if(S.peer!==GK||S.prof.is_admin)us.unshift('semua');
+  return us.filter(u=>u.toLowerCase().startsWith(q.toLowerCase())).slice(0,6)}
+$('draft').addEventListener('input',()=>{const d=$('draft'),mp=$('mp');if(!S.peer||!isG(S.peer)){mp.hidden=true;return}
+  const m=d.value.slice(0,d.selectionStart).match(/(^|\s)@([a-z0-9_]*)$/i);if(!m){mp.hidden=true;return}
+  const c=mCands(m[2]);if(!c.length){mp.hidden=true;return}
+  mp.replaceChildren(...c.map(u=>h('button',{type:'button',onclick:()=>{const pos=d.selectionStart,pre=d.value.slice(0,pos).replace(/@[a-z0-9_]*$/i,'@'+u+' ');d.value=pre+d.value.slice(pos);mp.hidden=true;d.focus();d.selectionStart=d.selectionEnd=pre.length}},'@'+u)));mp.hidden=false});
+function showNews(from){const vs=Object.keys(CL).filter(v=>!from||cmpV(v,from)>0).sort((a,b)=>cmpV(b,a)),li={id:0,en:1,ja:2}[lang];
+  openDlg(h('div',{class:'mn'},h('b',{style:'font-size:1.2rem'},t('news')),...vs.flatMap(v=>[h('small',{style:'color:var(--mut)'},t('ver')+' '+v),h('ul',{class:'nl'},...CL[v].split('\n').map(r=>h('li',{},r.split('|')[li]||r.split('|')[0])))]),h('button',{class:'btn',onclick:closeDlg},t('ok'))))}
+function checkNews(){const v=pref('ver');if(v===VER)return;pref('ver',VER);showNews(v)}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
