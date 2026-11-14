@@ -162,6 +162,7 @@ html[data-bub=soft] .bub{border-radius:26px}
 .sh2{position:absolute;top:1.2rem;left:.8rem;right:.8rem;display:flex;justify-content:space-between;align-items:center;z-index:3;text-shadow:0 1px 4px #000}
 .tp{position:absolute;inset:0;z-index:2}.ft{position:absolute;bottom:1rem;left:1rem;right:1rem;display:flex;justify-content:space-between;z-index:3}
 .sh2 .ghost,.ft .ghost{color:#fff;border-color:#fff8;background:#0006}
+.big .av{width:5rem;height:5rem;font-size:2rem}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -321,7 +322,13 @@ seenby|Dilihat oleh|Seen by|閲覧者
 addmem|Tambah anggota|Add members|メンバー追加
 bgchat|Latar obrolan|Chat background|チャット背景
 bg_mosaic|Mosaik|Mosaic|モザイク
-bg_plain|Polos|Plain|無地`;
+bg_plain|Polos|Plain|無地
+rename|Ganti nama|Rename|名前を変更
+gphoto|Ganti foto grup|Change group photo|グループ写真を変更
+mem|anggota|members|メンバー
+owner|Pembuat|Owner|作成者
+kick|Keluarkan|Remove|削除
+you|Kamu|You|あなた`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -339,7 +346,7 @@ const tgt=(id=S.peer)=>isG(id)?{group_id:id.slice(2)}:{recipient_id:id};
 const uname=id=>(S.pp[id]||{}).display_name||'@'+(S.pf[id]||'?');
 const name=id=>id===S.me?t('me'):isG(id)?((S.gr.find(g=>'g:'+g.id===id)||{}).name||'Grup'):uname(id);
 const vt=f=>document.startViewTransition?document.startViewTransition(f):f();
-const av=id=>{const p=S.pp[id]||{},e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));return e};
+const av=id=>{const p=isG(id)?(S.gr.find(g=>'g:'+g.id===id)||{}):(S.pp[id]||{}),e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));return e};
 const nmx=(p,text)=>{const fx=/^(glow|pulse|shimmer|rainbow)$/.test(p.name_fx)?'fx-'+p.name_fx:'',col=/^#[0-9a-f]{6}$/i.test(p.name_color||''),e=h('b',{class:fx||(col?'fx-solid':'')},text);if(col)e.style.setProperty('--nc',p.name_color);return p.is_admin?h('span',{class:'nw'},e,h('i',{class:'adm'},'★ Admin')):e};
 const nm=id=>nmx(S.pp[id]||{},name(id));
 const other=f=>f.requester===S.me?f.addressee:f.requester;
@@ -409,7 +416,7 @@ function render(){
   const pend=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).length;
   $('nav').replaceChildren(h('b',{class:'logo'},'Oper'),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),onclick:()=>{if(k===S.tab)return;if(k==='chats'){if(history.state&&history.state.t){history.back();return}}else if(S.tab==='chats')history.pushState({t:1},'');S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k!=='chats')S.peer=null;vt(render)}},t(k),(k==='friends'?pend:k==='chats'?tot():0)?h('i',{class:'dot'},k==='friends'?pend:tot()):null)));
   renderSide();
-  const chat=S.tab==='chats'&&S.peer;$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');
+  const chat=S.tab==='chats'&&S.peer;$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');$('chead').style.cursor=S.peer&&isG(S.peer)?'pointer':'';
   if(S.tab==='chats')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
   else if(S.tab==='media')renderMedia();else if(S.tab==='friends')renderFriends();else renderSettings();
   markRead();
@@ -622,6 +629,23 @@ async function cleanStories(){if(cleaned)return;cleaned=true;
   const old=S.st.filter(x=>x.user_id===S.me&&new Date(x.expires_at)<=Date.now());if(!old.length)return;
   const f=old.map(x=>x.file_path).filter(Boolean);if(f.length)await sb.storage.from(BUCKET).remove(f);
   await sb.from('stories').delete().in('id',old.map(x=>x.id))}
+$('chead').addEventListener('click',e=>{if(S.tab==='chats'&&isG(S.peer)&&!e.target.closest('button'))groupInfo()});
+function groupInfo(){const g=S.gr.find(x=>'g:'+x.id===S.peer);if(!g)return;const own=g.owner===S.me,mem=S.gm.filter(x=>x.group_id===g.id);
+  const pick=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{const f=e.target.files[0];e.target.value='';if(f){closeDlg();gPhoto(g,f)}}});
+  openDlg(h('div',{class:'mn'},
+    h('div',{style:'display:grid;justify-items:center;gap:.3rem'},h('span',{class:'big'},av('g:'+g.id)),h('b',{style:'font-size:1.2rem'},g.name),h('small',{style:'color:var(--mut)'},mem.length+' '+t('mem'))),
+    own?h('div',{class:'acts',style:'justify-content:center'},h('button',{class:'ghost',onclick:()=>{closeDlg();renameG(g)}},t('rename')),h('button',{class:'ghost',onclick:()=>pick.click()},t('gphoto')),pick):h('span'),
+    h('p',{style:'margin:.4rem 0 0;color:var(--mut);font-size:.9rem'},t('mem')),
+    ...mem.map(x=>h('div',{class:'frow'},h('span',{class:'who'},av(x.user_id),nmx(S.pp[x.user_id]||{},uname(x.user_id)+(x.user_id===S.me?' ('+t('you')+')':'')),x.user_id===g.owner?h('i',{class:'adm'},t('owner')):h('span')),
+      own&&x.user_id!==S.me?h('button',{class:'ghost',onclick:()=>rmMem(g,x.user_id)},t('kick')):h('span')))))}
+function renameG(g){const inp=h('input',{maxlength:40});inp.value=g.name;
+  openDlg(h('div',{class:'mn'},h('b',{},t('rename')),inp,h('button',{class:'btn',onclick:async()=>{const n=inp.value.trim();if(!n)return;const{error}=await sb.from('groups').update({name:n}).eq('id',g.id);closeDlg();error?toast(error.message):loadAll()}},t('save'))));inp.focus()}
+async function gPhoto(g,f){const ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(ext==='gif'&&!S.prof.is_admin)return toast(t('gifonly'));if(f.size>5*1024*1024)return toast('> 5 MB');
+  const path=S.me+'/group-'+g.id+'-'+Date.now()+'.'+ext,u=await sb.storage.from('avatars').upload(path,f,{contentType:f.type||'image/png'});if(u.error)return toast(u.error.message);
+  const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl,{error}=await sb.from('groups').update({avatar_url:url}).eq('id',g.id);
+  error?toast(error.message):loadAll()}
+async function rmMem(g,uid){const{error}=await sb.from('group_members').delete().eq('group_id',g.id).eq('user_id',uid);closeDlg();error?toast(error.message):loadAll()}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
