@@ -166,6 +166,17 @@ html[data-bub=soft] .bub{border-radius:26px}
 .dl{font-style:italic;opacity:.75}
 #chead{min-width:0}#chead .cm{min-width:0;flex:1}#chead .cm small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body[data-tab=global] .back{display:none!important}
+.tb{display:flex;gap:5px;padding:.75rem .9rem}
+.tb i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:bn 1.2s infinite}
+.tb i:nth-child(2){animation-delay:.15s}.tb i:nth-child(3){animation-delay:.3s}
+@keyframes bn{0%,60%,100%{transform:none;opacity:.45}30%{transform:translateY(-5px);opacity:1}}
+.fdr{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.04em;padding:.08rem .5rem;border-radius:9px;margin-left:.4rem;vertical-align:middle;white-space:nowrap;color:#3b2300;background:linear-gradient(110deg,#ffd76a,#fff1b8,#ffb300,#ffd76a);background-size:200% 100%;animation:sh 3s linear infinite;box-shadow:0 0 8px #ffb30088}
+.gb{font-style:normal;font-size:.62rem;font-weight:700;padding:.05rem .4rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);margin-right:.4rem;vertical-align:middle;white-space:nowrap}
+.av.grp,.av.grp img{border-radius:28%}
+.stkimg{width:9rem;max-width:100%;display:block}
+.sp{max-height:20rem;overflow:auto;width:min(22rem,calc(100vw - 2rem))}
+.sp img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
+@media(prefers-reduced-motion:reduce){.tb i,.fdr{animation:none!important}}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -223,6 +234,7 @@ body[data-tab=global] .back{display:none!important}
 <div id="dlg" hidden></div>
 <div id="lb" hidden></div>
 <input id="af" type="file" accept="image/*" hidden>
+<input id="sf" type="file" accept="image/*" hidden>
 <p id="toast" role="status" aria-live="polite"></p>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -340,7 +352,10 @@ msg2|Kirim pesan|Message|メッセージ
 fcount|teman|friends|友だち
 lastseen|Terakhir aktif|Last seen|最終オンライン
 typing|sedang mengetik...|is typing...|入力中...
-disc|Temukan orang|Find people|ユーザーを探す`;
+disc|Temukan orang|Find people|ユーザーを探す
+grp|Grup|Group|グループ
+mkadm|Jadikan admin|Make admin|管理者にする
+unadm|Cabut admin|Remove admin|管理者を外す`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -348,26 +363,26 @@ const t=k=>T[lang][k]||T.en[k]||k;
 const ink=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*299+(n>>8&255)*587+(n&255)*114)/1000>150?'#000':'#fff'};
 function applyTheme(){const d=document.documentElement,a=pref('accent');d.dataset.theme=pref('theme')||'black';d.dataset.bub=pref('bub')||'round';const mi=pref('mine');if(mi){d.style.setProperty('--mine',mi);d.style.setProperty('--mon',ink(mi))}else{d.style.removeProperty('--mine');d.style.removeProperty('--mon')}if(a){d.style.setProperty('--accent',a);d.style.setProperty('--on',ink(a))}else{d.style.removeProperty('--accent');d.style.removeProperty('--on')}}
 
-const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},mf:'all'};
+const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
 const TABS=['chats','global','media','friends','settings'];
-const GID='00000000-0000-0000-0000-0000000000a1',GK='g:'+GID,PF='id,username,display_name,bio,avatar_url,is_admin,name_color,name_fx,frame,last_seen';
+const GID='00000000-0000-0000-0000-0000000000a1',GK='g:'+GID,PF='id,username,display_name,bio,avatar_url,is_admin,name_color,name_fx,frame,last_seen,is_founder';
 const isG=id=>typeof id==='string'&&id.startsWith('g:');
 const peerOf=m=>m.group_id?'g:'+m.group_id:m.sender_id===S.me?m.recipient_id:m.sender_id;
 const tgt=(id=S.peer)=>isG(id)?{group_id:id.slice(2)}:{recipient_id:id};
 const uname=id=>(S.pp[id]||{}).display_name||'@'+(S.pf[id]||'?');
 const name=id=>id===S.me?t('me'):isG(id)?((S.gr.find(g=>'g:'+g.id===id)||{}).name||'Grup'):uname(id);
 const vt=f=>document.startViewTransition?document.startViewTransition(f):f();
-const av=id=>{const p=isG(id)?(S.gr.find(g=>'g:'+g.id===id)||{}):(S.pp[id]||{}),e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));return e};
-const nmx=(p,text)=>{const fx=/^(glow|pulse|shimmer|rainbow)$/.test(p.name_fx)?'fx-'+p.name_fx:'',col=/^#[0-9a-f]{6}$/i.test(p.name_color||''),e=h('b',{class:fx||(col?'fx-solid':'')},text);if(col)e.style.setProperty('--nc',p.name_color);return p.is_admin?h('span',{class:'nw'},e,h('i',{class:'adm'},'★ Admin')):e};
-const nm=id=>nmx(S.pp[id]||{},name(id));
+const av=id=>{const p=isG(id)?(S.gr.find(g=>'g:'+g.id===id)||{}):(S.pp[id]||{}),e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));if(isG(id))e.classList.add('grp');return e};
+const nmx=(p,text)=>{const fx=/^(glow|pulse|shimmer|rainbow)$/.test(p.name_fx)?'fx-'+p.name_fx:'',col=/^#[0-9a-f]{6}$/i.test(p.name_color||''),e=h('b',{class:fx||(col?'fx-solid':'')},text);if(col)e.style.setProperty('--nc',p.name_color);return p.is_founder?h('span',{class:'nw'},e,h('i',{class:'fdr'},'👑 Founder')):p.is_admin?h('span',{class:'nw'},e,h('i',{class:'adm'},'★ Admin')):e};
+const nm=id=>isG(id)&&id!==GK?h('span',{class:'nw'},h('i',{class:'gb'},'👥 '+t('grp')),nmx({},name(id))):nmx(S.pp[id]||{},name(id));
 const other=f=>f.requester===S.me?f.addressee:f.requester;
 const friends=()=>S.fr.filter(f=>f.status==='accepted').map(other);
 const isImg=n=>/\.(jpe?g|png|gif|webp|avif)$/i.test(n);
 const size=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB';
 const hm=i=>{const d=new Date(i);return d.toDateString()===new Date().toDateString()?d.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString(lang,{day:'numeric',month:'short'})};
-const preview=m=>m.deleted_at?t('deleted'):m.kind==='file'?'📎 '+m.content:m.content;
+const preview=m=>m.deleted_at?t('deleted'):m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.i);toast.i=setTimeout(()=>e.classList.remove('show'),2600)}
 function show(n){['auth','setup','app'].forEach(i=>$(i).hidden=i!==n)}
 
@@ -407,9 +422,9 @@ function enter(){show('app');S.peer=wide()?S.me:null;render();loadAll();
 /* ---- data ---- */
 async function loadAll(){
   const before=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).map(f=>f.id);
-  const[m,f,gq,gmq,sq,svq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*')]);
+  const[m,f,gq,gmq,sq,svq,stq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*'),sb.from('stickers').select('*').order('created_at')]);
   if(m.error||f.error){toast((m.error||f.error).message);return}
-  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
+  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];S.stk=stq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
   const ids=new Set();S.msgs.forEach(x=>{ids.add(x.sender_id);ids.add(x.recipient_id)});S.fr.forEach(x=>{ids.add(x.requester);ids.add(x.addressee)});S.gm.forEach(x=>ids.add(x.user_id));S.st.forEach(x=>ids.add(x.user_id));S.svw.forEach(x=>ids.add(x.viewer_id));
   const need=[...ids].filter(Boolean);
   if(need.length){const p=await sb.from('profiles').select(PF).in('id',need);(p.data||[]).forEach(r=>{S.pf[r.id]=r.username;S.pp[r.id]=r})}
@@ -443,7 +458,7 @@ function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(
 function bubble(m){
   const mine=m.sender_id===S.me,c=[],g=!!m.group_id;if(g&&!mine)c.push(h('div',{class:'sn'},nm(m.sender_id)));
   if(m.deleted_at)c.push(h('span',{class:'tx dl'},t('deleted')));else if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
-  else if(m.kind==='sticker')c.push(h('span',{class:'stk'},m.content));
+  else if(m.kind==='sticker')c.push(/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(m.content)?h('img',{class:'stkimg',src:m.content,alt:''}):h('span',{class:'stk'},m.content));
   else if(m.kind==='link'&&/^https?:\/\//i.test(m.content))c.push(h('a',{href:m.content,target:'_blank',rel:'noopener noreferrer'},m.content));
   else c.push(h('span',{class:'tx'},m.content));
   return h('div',{class:'row '+(mine?'me':'you')},g&&!mine?avc(m.sender_id):null,h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')+(m.kind==='sticker'?' st':''),oncontextmenu:e=>{e.preventDefault();msgMenu(m)}},...c,h('time',{},h('span',{class:'tt'},(m.edited_at?t('edited')+' ':'')+hm(m.created_at)),tick(m)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
@@ -452,7 +467,7 @@ function renderChat(){
   $('chead').replaceChildren(h('button',{class:'back','aria-label':'back',onclick:()=>{history.state&&history.state.c?history.back():(S.peer=null,render())}},'‹'),av(S.peer),h('span',{class:'cm'},nm(S.peer),h('small',{style:'color:var(--mut)'},hdr(S.peer))));
   const bd=$('body'),near=bd.scrollHeight-bd.scrollTop-bd.clientHeight<140||bd.dataset.p!==S.peer;
   bd.className='msgs';bd.dataset.p=S.peer;
-  bd.replaceChildren(...S.msgs.filter(m=>peerOf(m)===S.peer).map(bubble));
+  bd.replaceChildren(...S.msgs.filter(m=>peerOf(m)===S.peer).map(bubble),...(typing(S.peer)&&S.peer!==GK?[h('div',{class:'row you'},isG(S.peer)?av(S.tyn[S.peer]):h('span'),h('div',{class:'bub tb'},h('i'),h('i'),h('i')))]:[]));
   if(near)bd.scrollTop=bd.scrollHeight;
 }
 function renderMedia(){
@@ -483,7 +498,7 @@ function renderSettings(){
   const bd=$('body');bd.className='pane narrow';
   const seg=(items,cur,fn)=>h('div',{class:'seg'},...items.map(([v,l])=>h('button',{class:cur===v?'on':'',onclick:()=>fn(v)},l)));
   const cur=pref('theme')||'black';
-  const prof=h('div',{class:'set'},h('p',{},t('prof')),h('div',{class:'who'},av(S.me),h('button',{class:'ghost',onclick:()=>$('af').click()},t('avatar')),S.prof.is_admin?h('b',{},'★ Admin'):h('span')),
+  const prof=h('div',{class:'set'},h('p',{},t('prof')),h('div',{class:'who'},av(S.me),h('button',{class:'ghost',onclick:()=>$('af').click()},t('avatar')),S.prof.is_founder?h('b',{},'👑 Founder'):S.prof.is_admin?h('b',{},'★ Admin'):h('span')),
     h('input',{id:'dn',value:S.prof.display_name||'',placeholder:t('dname'),maxlength:30,style:'margin-top:.6rem'}),
     h('input',{id:'bi',value:S.prof.bio||'',placeholder:t('bio'),maxlength:140,style:'margin-top:.5rem'}),
     h('button',{class:'btn sm',style:'margin-top:.5rem',onclick:saveProf},t('save')));
@@ -540,8 +555,18 @@ $('af').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)ret
 async function redeem(){const{data,error}=await sb.rpc('redeem_admin_code',{code:$('ac').value.trim()});
   if(error||!data)return toast(t('admbad'));S.prof.is_admin=true;S.pp[S.me]=S.prof;toast(t('admok'));render()}
 const STK=['😀','😂','🥹','😍','😎','🤔','😭','😡','👍','👏','🙏','🔥','🎉','❤️','💀','🤝','😴','🤯','🥳','😅','🫡','💯','✨','🍕'];
-$('sp').replaceChildren(...STK.map(x=>h('button',{type:'button',onclick:async()=>{$('sp').hidden=true;if(!S.peer)return;const{error}=await sb.from('messages').insert({...tgt(),kind:'sticker',content:x});error?toast(error.message):loadAll()}},x)));
-$('stb').onclick=()=>{$('sp').hidden=!$('sp').hidden};
+function buildSp(){$('sp').replaceChildren(...STK.map(x=>h('button',{type:'button',onclick:()=>sendStk(x)},x)),
+  ...S.stk.map(k=>h('button',{type:'button',onclick:()=>sendStk(k.url),oncontextmenu:e=>{e.preventDefault();if(S.prof.is_admin&&confirm(t('del')+'?'))rmStk(k)}},h('img',{src:k.url,alt:''}))),
+  S.prof&&S.prof.is_admin?h('button',{type:'button',onclick:()=>$('sf').click()},'+'):h('span'))}
+async function sendStk(c){$('sp').hidden=true;if(!S.peer)return;const{error}=await sb.from('messages').insert({...tgt(),kind:'sticker',content:c});error?toast(error.message):loadAll()}
+$('sf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>2*1024*1024)return toast('> 2 MB');
+  const ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,''),path=S.me+'/'+Date.now()+'.'+ext;
+  const u=await sb.storage.from('stickers').upload(path,f,{contentType:f.type||'image/png'});if(u.error)return toast(u.error.message);
+  const url=sb.storage.from('stickers').getPublicUrl(path).data.publicUrl,{error}=await sb.from('stickers').insert({url,path});
+  if(error)return toast(error.message);await loadAll();buildSp();$('sp').hidden=false};
+async function rmStk(k){await sb.storage.from('stickers').remove([k.path]);const{error}=await sb.from('stickers').delete().eq('id',k.id);if(error)return toast(error.message);await loadAll();buildSp()}
+async function setAdmin(id,v){const{error}=await sb.rpc('set_admin',{uid:id,val:v});if(error)return toast(error.message);S.users=null;loadUsers()}
+$('stb').onclick=()=>{const sp=$('sp');sp.hidden=!sp.hidden;if(!sp.hidden)buildSp()};
 
 function fxBlock(){
   const P=S.prof,seg2=(items,cur,key)=>h('div',{class:'seg'},...items.map(v=>h('button',{class:(cur||'none')===v?'on':'',onclick:()=>saveFx({[key]:v})},t('f_'+v))));
@@ -593,7 +618,7 @@ async function leaveG(){const g=S.peer.slice(2),{error}=await sb.from('group_mem
   if(error)return toast(error.message);S.peer=null;if(history.state&&history.state.c)history.back();await loadAll()}
 function usersBlock(){if(!S.users)loadUsers();const u=S.users||[];
   return h('div',{class:'set'},h('p',{},t('users')+' ('+u.length+', '+u.filter(x=>S.on.has(x.id)).length+' '+t('online')+')'),
-    ...u.map(x=>h('div',{class:'frow'},h('span',{class:'who'},av(x.id),nmx(S.pp[x.id]||{},uname(x.id))),h('small',{style:'color:var(--mut)'},S.on.has(x.id)?'● '+t('online'):''))))}
+    ...u.map(x=>h('div',{class:'frow'},h('span',{class:'who'},av(x.id),nmx(S.pp[x.id]||{},uname(x.id))),h('span',{class:'acts'},h('small',{style:'color:var(--mut)'},S.on.has(x.id)?'● '+t('online'):''),S.prof.is_founder&&!x.is_founder?h('button',{class:'ghost',onclick:()=>setAdmin(x.id,!x.is_admin)},x.is_admin?t('unadm'):t('mkadm')):h('span')))))}
 async function loadUsers(){const{data}=await sb.from('profiles').select(PF).order('created_at',{ascending:false}).limit(200);
   S.users=data||[];S.users.forEach(r=>{S.pf[r.id]=r.username;S.pp[r.id]=r});if(S.tab==='settings'||S.tab==='friends')render()}
 const tick=m=>{if(m.sender_id!==S.me)return null;
