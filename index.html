@@ -30,7 +30,7 @@ input,textarea{width:100%;background:var(--sf);border:1px solid var(--line);bord
 .err{color:var(--danger);min-height:1.4rem;margin:.5rem 0 0;font-size:.9rem}
 .empty{color:var(--mut)}
 
-#auth,#setup{min-height:100dvh;display:grid;place-items:center;padding:1.25rem}
+#auth,#setup,#mt{min-height:100dvh;display:grid;place-items:center;padding:1.25rem}
 .card{width:100%;max-width:25rem;background:var(--sf);border:2px solid var(--ink);border-radius:16px;box-shadow:7px 7px 0 var(--accent);padding:1.5rem;display:grid;gap:.75rem}
 .brand{font:800 2.2rem/1 var(--d);margin:0;letter-spacing:-.02em}
 .or{text-align:center;color:var(--mut);margin:0}
@@ -222,6 +222,8 @@ body[data-tab=global] .back{display:none!important}
   </form>
 </section>
 
+<section id="mt" hidden></section>
+
 <div id="app" hidden>
   <nav id="nav"></nav>
   <aside id="side"></aside>
@@ -373,7 +375,13 @@ seenews|Lihat pembaruan|See what's new|更新内容を見る
 reply|Balas|Reply|返信
 allonly|Hanya admin yang boleh @semua di Global|Only admins can use @all in Global|グローバルで@allを使えるのは管理者のみ
 today|hari ini|today|今日
-yday|kemarin|yesterday|昨日`;
+yday|kemarin|yesterday|昨日
+maint|Maintenance|Maintenance|メンテナンス
+mtph|Tulis pesan di bawah "Maintenance"|Message shown under "Maintenance"|「メンテナンス」の下に表示するメッセージ
+mtdef|Oper sedang diperbaiki. Silakan kembali lagi nanti.|Oper is under maintenance. Please come back later.|Operはメンテナンス中です。しばらくしてからもう一度お試しください。
+on|Aktif|On|オン
+off|Mati|Off|オフ
+mtlogin|Masuk sebagai founder|Founder login|Founderログイン`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -384,8 +392,9 @@ function applyTheme(){const d=document.documentElement,a=pref('accent');d.datase
 const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
-const VER='0.12';
-const CL={'0.12':`Tag @orang di grup dan Global, @semua untuk semua anggota (di Global hanya admin)|Mention @people in groups and Global, @all for every member (admins only in Global)|グループとグローバルで@メンション、@allは全員宛（グローバルは管理者のみ）
+const VER='0.13';
+const CL={'0.13':`Mode maintenance: saat perbaikan, aplikasi menampilkan halaman maintenance dengan pesan dari founder|Maintenance mode: during repairs the app shows a maintenance page with a message from the founder|メンテナンスモード：修理中はFounderのメッセージ付きメンテナンス画面を表示`,
+'0.12':`Tag @orang di grup dan Global, @semua untuk semua anggota (di Global hanya admin)|Mention @people in groups and Global, @all for every member (admins only in Global)|グループとグローバルで@メンション、@allは全員宛（グローバルは管理者のみ）
 Balas pesan di obrolan pribadi, grup, dan Global|Reply to messages in chats, groups and Global|個人チャット・グループ・グローバルでメッセージに返信
 Terakhir aktif ala WhatsApp (hari ini, kemarin)|WhatsApp-style last seen (today, yesterday)|WhatsApp風の最終オンライン表示
 Pop up daftar pembaruan|What's new pop-up|更新情報ポップアップ`,
@@ -412,7 +421,7 @@ const size=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFi
 const hm=i=>{const d=new Date(i);return d.toDateString()===new Date().toDateString()?d.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString(lang,{day:'numeric',month:'short'})};
 const preview=m=>m.deleted_at?t('deleted'):m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.i);toast.i=setTimeout(()=>e.classList.remove('show'),2600)}
-function show(n){['auth','setup','app'].forEach(i=>$(i).hidden=i!==n)}
+function show(n){['auth','setup','mt','app'].forEach(i=>$(i).hidden=i!==n)}
 
 function setMode(m){mode=m;$('as').textContent=t(m==='in'?'signin':'signup');$('sw').textContent=t(m==='in'?'noacct':'haveacct');$('pw').autocomplete=m==='in'?'current-password':'new-password';$('ae').textContent=''}
 function applyLang(){document.documentElement.lang=lang;document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll('[data-ph]').forEach(e=>e.placeholder=t(e.dataset.ph));$('un').placeholder='username';setMode(mode);if(S.me&&S.prof)render()}
@@ -428,21 +437,22 @@ $('sform').onsubmit=async e=>{e.preventDefault();const username=$('un').value.tr
   if(!/^[a-z0-9_]{3,20}$/.test(username)){$('se').textContent=t('badname');return}
   const{error}=await sb.from('profiles').insert({id:S.me,username});
   if(error){$('se').textContent=error.code==='23505'?t('taken'):error.message;return}
-  S.prof={id:S.me,username,is_admin:false};S.pf[S.me]=username;S.pp[S.me]=S.prof;pref('ver',VER);enter()};
+  S.prof={id:S.me,username,is_admin:false};S.pf[S.me]=username;S.pp[S.me]=S.prof;pref('ver',VER);subSettings();gate()};
 
 sb.auth.onAuthStateChange((_e,session)=>setTimeout(()=>boot(session),0));
 async function boot(session){
   const uid=session&&session.user.id;
   if(uid&&uid===S.me)return;
+  await loadMt();
   if(ch){sb.removeChannel(ch);ch=null}
   if(pc){sb.removeChannel(pc);pc=null}
   Object.assign(S,{me:uid||null,prof:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],peer:null,tab:'chats'});seen.clear();imgs.clear();primed=false;
-  if(!uid){show('auth');return}
+  if(!uid){if(sc){sb.removeChannel(sc);sc=null}gate();return}
   const{data}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();
   if(!data){show('setup');return}
-  S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;enter();
+  S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;subSettings();gate();
 }
-function enter(){show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);
+function enter(){if(ch){sb.removeChannel(ch);ch=null}if(pc){sb.removeChannel(pc);pc=null}show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);
   ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'groups'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'group_members'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'stories'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'story_views'},loadAll).subscribe();
   pc=sb.channel('online',{config:{presence:{key:S.me}}});
   pc.on('presence',{event:'sync'},()=>{S.on=new Set(Object.keys(pc.presenceState()));if(S.tab!=='settings')render()}).on('broadcast',{event:'typing'},({payload:p})=>{if(!p||p.from===S.me)return;const k=isG(p.to)?p.to:p.from;if(isG(p.to)?!S.gr.some(g=>'g:'+g.id===p.to):p.to!==S.me)return;S.ty[k]=Date.now();S.tyn[k]=p.from;if(S.tab==='chats')render();setTimeout(()=>{if(S.tab==='chats'&&!typing(k))render()},3600)}).subscribe(st=>{if(st==='SUBSCRIBED')pc.track({at:Date.now()})});touch();clearInterval(lsT);lsT=setInterval(()=>{if(!document.hidden)touch()},60000)}
@@ -470,7 +480,7 @@ function render(){
   document.title=(tot()?'('+tot()+') ':'')+'Oper';
   document.body.dataset.tab=S.tab;document.body.classList.toggle('open',S.tab==='chats'&&!!S.peer);
   const pend=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).length;
-  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),onclick:()=>{if(k===S.tab)return;if(k==='chats'){if(history.state&&history.state.t){history.back();return}}else if(S.tab==='chats')history.pushState({t:1},'');S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k==='global')S.peer=GK;else if(k!=='chats')S.peer=null;vt(render)}},t(k),(k==='friends'?pend:k==='chats'?tot():0)?h('i',{class:'dot'},k==='friends'?pend:tot()):null)));
+  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'+(S.mt.on?' 🛠':'')),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),onclick:()=>{if(k===S.tab)return;if(k==='chats'){if(history.state&&history.state.t){history.back();return}}else if(S.tab==='chats')history.pushState({t:1},'');S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k==='global')S.peer=GK;else if(k!=='chats')S.peer=null;vt(render)}},t(k),(k==='friends'?pend:k==='chats'?tot():0)?h('i',{class:'dot'},k==='friends'?pend:tot()):null)));
   renderSide();
   const chat=(S.tab==='chats'&&S.peer)||S.tab==='global';$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');$('chead').style.cursor=S.peer&&S.peer!==S.me&&S.peer!==GK?'pointer':'';
   if(S.tab==='chats'||S.tab==='global')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
@@ -534,6 +544,7 @@ function renderSettings(){
     h('p',{},t('mine')),h('div',{class:'acts'},h('input',{type:'color',value:pref('mine')||'#7f9bff',oninput:e=>{pref('mine',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('mine',null);applyTheme();render()}},t('reset'))));
   const inst=ip?h('div',{class:'set'},h('button',{class:'btn',onclick:async()=>{ip.prompt();await ip.userChoice;ip=null;render()}},t('install'))):h('span');
   const bgb=h('div',{class:'set'},h('p',{},t('bgchat')),seg([['mosaic',t('bg_mosaic')],['plain',t('bg_plain')]],pref('bg')||'mosaic',v=>{pref('bg',v);render()}));
+  const mtb=S.prof.is_founder?mtBlock():h('span');
   const usb=S.prof.is_admin?usersBlock():h('span');
   const fxb=S.prof.is_admin?fxBlock():h('span');
   const adm=S.prof.is_admin?h('span'):h('div',{class:'set'},h('p',{},t('adm')),h('div',{class:'add'},h('input',{id:'ac',type:'password',autocomplete:'off'}),h('button',{class:'btn sm',onclick:redeem},t('save'))));
@@ -542,7 +553,7 @@ function renderSettings(){
     h('div',{class:'set'},h('p',{},t('accent')),h('div',{class:'acts'},h('input',{type:'color',value:pref('accent')||'#7f9bff',oninput:e=>{pref('accent',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('accent',null);applyTheme();render()}},t('reset')))),
     bub,bgb,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
-    inst,fxb,adm,usb,
+    inst,fxb,adm,usb,mtb,
     h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')),h('p',{style:'text-align:center;color:var(--mut);font-size:.85rem;margin-top:1rem'},'Oper v'+VER+' · ',h('button',{class:'link',onclick:()=>showNews('')},t('seenews'))));
 }
 
@@ -749,6 +760,21 @@ $('draft').addEventListener('input',()=>{const d=$('draft'),mp=$('mp');if(!S.pee
 function showNews(from){const vs=Object.keys(CL).filter(v=>!from||cmpV(v,from)>0).sort((a,b)=>cmpV(b,a)),li={id:0,en:1,ja:2}[lang];
   openDlg(h('div',{class:'mn'},h('b',{style:'font-size:1.2rem'},t('news')),...vs.flatMap(v=>[h('small',{style:'color:var(--mut)'},t('ver')+' '+v),h('ul',{class:'nl'},...CL[v].split('\n').map(r=>h('li',{},r.split('|')[li]||r.split('|')[0])))]),h('button',{class:'btn',onclick:closeDlg},t('ok'))))}
 function checkNews(){const v=pref('ver');if(v===VER)return;pref('ver',VER);showNews(v)}
+/* ---- mode maintenance ---- */
+let sc=null;S.mt={on:false,msg:''};
+async function loadMt(){const{data}=await sb.from('app_settings').select('maintenance,maintenance_msg').eq('id',1).maybeSingle();S.mt=data?{on:!!data.maintenance,msg:data.maintenance_msg||''}:{on:false,msg:''}}
+function drawMt(){$('mt').replaceChildren(h('div',{class:'card',style:'text-align:center'},h('div',{style:'font-size:3rem'},'🛠'),h('h2',{style:'margin:0'},t('maint')),h('p',{class:'or',style:'white-space:pre-wrap'},S.mt.msg||t('mtdef')),
+  S.me?h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')):h('button',{class:'link',style:'justify-self:center',onclick:()=>show('auth')},t('mtlogin'))))}
+function gate(){const f=!!(S.prof&&S.prof.is_founder);
+  if(!S.me){if(S.mt.on){show('mt');drawMt()}else show('auth');return}
+  if(S.mt.on&&!f){show('mt');drawMt();return}
+  if($('app').hidden&&S.prof)enter();else if(!$('app').hidden)render()}
+function subSettings(){if(sc)return;sc=sb.channel('settings').on('postgres_changes',{event:'*',schema:'public',table:'app_settings'},async()=>{await loadMt();gate()}).subscribe()}
+function mtBlock(){const ta=h('textarea',{rows:3,maxlength:300,placeholder:t('mtph')});ta.value=S.mt.msg||'';
+  return h('div',{class:'set'},h('p',{},t('maint')),h('div',{class:'seg'},h('button',{class:S.mt.on?'':'on',onclick:()=>setMt({maintenance:false})},t('off')),h('button',{class:S.mt.on?'on':'',onclick:()=>setMt({maintenance:true})},t('on'))),ta,
+    h('button',{class:'btn sm',style:'margin-top:.5rem',onclick:()=>setMt({maintenance_msg:ta.value.trim()||t('mtdef')})},t('save')))}
+async function setMt(patch){const{error}=await sb.from('app_settings').update(patch).eq('id',1);if(error)return toast(error.message);
+  if('maintenance' in patch)S.mt.on=patch.maintenance;if('maintenance_msg' in patch){S.mt.msg=patch.maintenance_msg;toast(t('saved'))}render()}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
