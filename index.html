@@ -188,7 +188,7 @@ body[data-tab=global] .back{display:none!important}
 #mic.rec{background:#e53935!important;animation:bn 1s infinite}
 audio.vn{width:min(14rem,60vw);height:2.2rem;display:block;margin-top:.2rem}
 .row.hl .bub{animation:hl 1.6s}@keyframes hl{0%,60%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:none}}
-.conv.pn{position:relative}.conv.pn::after{content:"📌";position:absolute;top:.15rem;right:.4rem;font-size:.7rem;opacity:.7}
+.conv.pin{position:relative}.conv.pin::after{content:"📌";position:absolute;top:.15rem;right:.4rem;font-size:.7rem;opacity:.7}
 #main.bg.img::before{background:var(--bgimg) center/cover;-webkit-mask-image:none;mask-image:none;opacity:1}
 #main.bg.img::after{content:"";position:absolute;inset:0;background:#000;opacity:var(--dim,.4);pointer-events:none}
 @media(max-width:899px){.tab{font-size:.72rem;padding:.7rem .1rem}}
@@ -236,6 +236,11 @@ details summary{cursor:pointer;padding:.3rem 0;font-weight:600}
 .fr-founder::before{content:"";position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(from var(--a),#ffd76a,#ff7bd5,#7b9bff,#5ef0c0,#ffd76a);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:fa 3s linear infinite;filter:drop-shadow(0 0 6px #ffd76a99);pointer-events:none}
 @keyframes fa{to{--a:360deg}}
 @media(prefers-reduced-motion:reduce){.fr-founder::before{animation:none}}
+.rxs{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.25rem}
+.rxc{background:rgba(127,127,127,.25);border:1px solid transparent;border-radius:12px;padding:0 .4rem;font-size:.85rem;cursor:pointer;color:inherit}.rxc.on{border-color:var(--accent)}
+.pa{position:relative}.pa .ghost{display:flex;align-items:center;justify-content:center;gap:.35rem;color:var(--mut);font-weight:600}.pa .ghost:hover{background:var(--sf2)}
+.rxpill{position:absolute;bottom:calc(100% + .2rem);left:.6rem;background:var(--sf);border:1px solid var(--line);border-radius:999px;padding:.3rem .5rem;display:flex;gap:.2rem;box-shadow:0 6px 24px #0006;z-index:4}
+.rxpill button{font-size:1.7rem;background:none;border:0;cursor:pointer;transition:transform .12s;padding:0 .1rem}.rxpill button:hover{transform:scale(1.25) translateY(-4px)}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -489,7 +494,9 @@ apkna|File aplikasi belum tersedia, coba lagi nanti.|The app file is not availab
 comments|komentar|comments|コメント
 commentb|Komentar|Comment|コメント
 likeb|Suka|Like|いいね
-replyto|Membalas|Replying to|返信先`;
+replyto|Membalas|Replying to|返信先
+rxdel|Hapus reaksi saya|Remove my reaction|自分のリアクションを削除
+rxh|Reaksi|Reactions|リアクション`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -497,11 +504,14 @@ const t=k=>T[lang][k]||T.en[k]||k;
 const ink=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*299+(n>>8&255)*587+(n&255)*114)/1000>150?'#000':'#fff'};
 function applyTheme(){const d=document.documentElement,a=pref('accent');d.dataset.theme=pref('theme')||'black';d.dataset.bub=pref('bub')||'round';const mi=pref('mine');if(mi){d.style.setProperty('--mine',mi);d.style.setProperty('--mon',ink(mi))}else{d.style.removeProperty('--mine');d.style.removeProperty('--mon')}if(a){d.style.setProperty('--accent',a);d.style.setProperty('--on',ink(a))}else{d.style.removeProperty('--accent');d.style.removeProperty('--on')}}
 
-const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],sr:[],mf:'all'};
+const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],sr:[],mr:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
-const VER='0.18';
-const CL={'0.18':`Pemberitahuan di grup saat anggota ditambah atau dikeluarkan, dan saat nama atau foto grup diganti|Group notices when members are added or removed, or the name or photo changes|グループのメンバー追加・削除、名前・写真の変更をお知らせ
+const VER='0.19';
+const CL={'0.19':`Reaksi emoji apa saja pada pesan pribadi dan grup (tekan tahan pesan)|Emoji reactions on any private or group message (long-press)|個人・グループのメッセージに好きな絵文字でリアクション（長押し）
+Tombol suka ala Facebook dengan bilah reaksi mengambang|Facebook-style like button with a floating reaction bar|Facebook風のいいねボタンとリアクションバー
+Perbaikan: reaksi story dan tampilan obrolan yang disematkan|Fixes: story reactions and the layout of pinned chats|修正：ストーリーのリアクションとピン留めの表示`,
+'0.18':`Pemberitahuan di grup saat anggota ditambah atau dikeluarkan, dan saat nama atau foto grup diganti|Group notices when members are added or removed, or the name or photo changes|グループのメンバー追加・削除、名前・写真の変更をお知らせ
 Postingan lebih rapi: reaksi ala Facebook, balas komentar, komentar foto dan stiker, dan daftar yang bereaksi|Cleaner posts: Facebook-style reactions, comment replies, photo and sticker comments, and who reacted|投稿を整理：Facebook風リアクション・コメント返信・写真/スタンプ付きコメント・リアクションした人の一覧
 Reaksi untuk story|Story reactions|ストーリーにリアクション
 Username dan nama tidak boleh sama, serta bingkai khusus Founder|Unique usernames and names, plus a special Founder frame|ユーザー名・名前の重複禁止とFounder専用フレーム
@@ -579,17 +589,17 @@ async function boot(session){
   S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;subSettings();gate();
 }
 function enter(){if(ch){sb.removeChannel(ch);ch=null}if(pc){sb.removeChannel(pc);pc=null}show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);setTimeout(checkInstall,2200);
-  ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'groups'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'group_members'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'stories'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'story_views'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'pokes'},loadAll).subscribe();
+  ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'groups'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'group_members'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'stories'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'story_views'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'pokes'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'message_reactions'},loadAll).subscribe();
   pc=sb.channel('online',{config:{presence:{key:S.me}}});
   pc.on('presence',{event:'sync'},()=>{S.on=new Set(Object.keys(pc.presenceState()));if(S.tab!=='settings')render()}).on('broadcast',{event:'typing'},({payload:p})=>{if(!p||p.from===S.me)return;const k=isG(p.to)?p.to:p.from;if(isG(p.to)?!S.gr.some(g=>'g:'+g.id===p.to):p.to!==S.me)return;S.ty[k]=Date.now();S.tyn[k]=p.from;if(S.tab==='chats')render();setTimeout(()=>{if(S.tab==='chats'&&!typing(k))render()},3600)}).on('broadcast',{event:'call'},({payload:p})=>onCall(p)).subscribe(st=>{if(st==='SUBSCRIBED')pc.track({at:Date.now()})});touch();clearInterval(lsT);lsT=setInterval(()=>{if(!document.hidden)touch()},60000)}
 
 /* ---- data ---- */
 async function loadAll(){
   const before=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).map(f=>f.id);
-  const[m,f,gq,gmq,sq,svq,stq,pkq,srq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*'),sb.from('stickers').select('*').order('created_at'),sb.from('pokes').select('*').order('created_at',{ascending:false}).limit(50),sb.from('story_reacts').select('*')]);
+  const[m,f,gq,gmq,sq,svq,stq,pkq,srq,mrq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*'),sb.from('stickers').select('*').order('created_at'),sb.from('pokes').select('*').order('created_at',{ascending:false}).limit(50),sb.from('story_reacts').select('*'),sb.from('message_reactions').select('*').order('created_at',{ascending:false}).limit(3000)]);
   if(m.error||f.error){toast((m.error||f.error).message);return}
-  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];S.stk=stq.data||[];S.pk=pkq.data||[];S.sr=srq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
-  const ids=new Set();S.msgs.forEach(x=>{ids.add(x.sender_id);ids.add(x.recipient_id)});S.fr.forEach(x=>{ids.add(x.requester);ids.add(x.addressee)});S.gm.forEach(x=>ids.add(x.user_id));S.st.forEach(x=>ids.add(x.user_id));S.svw.forEach(x=>ids.add(x.viewer_id));S.pk.forEach(x=>ids.add(x.from_id));
+  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];S.stk=stq.data||[];S.pk=pkq.data||[];S.sr=srq.data||[];S.mr=mrq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
+  const ids=new Set();S.msgs.forEach(x=>{ids.add(x.sender_id);ids.add(x.recipient_id)});S.fr.forEach(x=>{ids.add(x.requester);ids.add(x.addressee)});S.gm.forEach(x=>ids.add(x.user_id));S.st.forEach(x=>ids.add(x.user_id));S.svw.forEach(x=>ids.add(x.viewer_id));S.pk.forEach(x=>ids.add(x.from_id));S.mr.forEach(z=>ids.add(z.user_id));
   const need=[...ids].filter(Boolean);
   if(need.length){const p=await sb.from('profiles').select(PF).in('id',need);(p.data||[]).forEach(r=>{S.pf[r.id]=r.username;S.pp[r.id]=r})}
   if(primed)S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me&&!before.includes(f.id)).forEach(f=>toast(t('newreq')+' '+name(f.requester)));
@@ -616,7 +626,7 @@ function render(){
 function renderSide(){
   const last=id=>S.msgs.filter(m=>peerOf(m)===id).pop();
   const ids=[S.me,...convs()].sort((a,b)=>((last(b)||{}).created_at||'').localeCompare((last(a)||{}).created_at||'')).sort((a,b)=>(pinIdx(b)>=0)-(pinIdx(a)>=0));
-  $('side').replaceChildren(h('div',{class:'sh'},h('h2',{style:'margin:0;padding:0'},t('chats')),h('button',{class:'ghost',onclick:newGroup},'+ '+t('newgrp'))),storyBar(),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':'')+(unread(id)?' un':'')+(pinIdx(id)>=0?' pn':''),oncontextmenu:e=>{e.preventDefault();pinMenu(id)},onclick:()=>{if(!wide()&&S.peer!==id)history.pushState({c:1},'');S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},typing(id)?t('typing'):l?preview(l):t('empty'))),l?h('span',{class:'rt'},h('time',{},hm(l.created_at)),unread(id)?h('span',{class:'ub'},(menU(id)?'@ ':'')+unread(id)):null):null)}));
+  $('side').replaceChildren(h('div',{class:'sh'},h('h2',{style:'margin:0;padding:0'},t('chats')),h('button',{class:'ghost',onclick:newGroup},'+ '+t('newgrp'))),storyBar(),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':'')+(unread(id)?' un':'')+(pinIdx(id)>=0?' pin':''),oncontextmenu:e=>{e.preventDefault();pinMenu(id)},onclick:()=>{if(!wide()&&S.peer!==id)history.pushState({c:1},'');S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},typing(id)?t('typing'):l?preview(l):t('empty'))),l?h('span',{class:'rt'},h('time',{},hm(l.created_at)),unread(id)?h('span',{class:'ub'},(menU(id)?'@ ':'')+unread(id)):null):null)}));
 }
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
 function bubble(m){if(m.kind==='system')return h('div',{class:'sys'},sysText(m));
@@ -625,6 +635,7 @@ function bubble(m){if(m.kind==='system')return h('div',{class:'sys'},sysText(m))
   else if(m.kind==='sticker')c.push(/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(m.content)?h('img',{class:'stkimg',src:m.content,alt:''}):h('span',{class:'stk'},m.content));
   else if(m.kind==='link'&&/^https?:\/\//i.test(m.content))c.push(h('a',{href:m.content,target:'_blank',rel:'noopener noreferrer'},m.content));
   else c.push(h('span',{class:'tx'},...mparts(m.content)));
+  const rr=S.mr.filter(z=>z.message_id===m.id);if(rr.length&&!m.deleted_at)c.push(rxChips(m,rr));
   return h('div',{class:'row '+(mine?'me':'you'),'data-id':m.id},g&&!mine?avc(m.sender_id):null,h('div',{class:'bub'+(primed&&!seen.has(m.id)?' new':'')+(m.kind==='sticker'?' st':''),oncontextmenu:e=>{e.preventDefault();msgMenu(m)}},...c,h('time',{},h('span',{class:'tt'},(m.edited_at?t('edited')+' ':'')+hm(m.created_at)),tick(m)),mine?h('button',{class:'x','aria-label':t('del'),onclick:()=>del(m)},'×'):null));
 }
 function renderChat(){
@@ -769,7 +780,7 @@ function msgMenu(m){if(m.deleted_at)return;const mine=m.sender_id===S.me,b=[['re
   if(m.kind==='file')b.push(['dl',()=>dl(m)]);
   if(mine&&m.kind==='text')b.push(['edit',()=>editMsg(m)]);
   if(mine)b.push(['info',()=>msgInfo(m)]);if(mine||(S.prof.is_admin&&m.group_id===GID))b.push(['del',()=>del(m)]);
-  if(b.length)openDlg(h('div',{class:'mn'},...b.map(([k,f])=>h('button',{onclick:()=>{closeDlg();f()}},t(k)))))}
+  if(b.length)openDlg(h('div',{class:'mn'},h('div',{class:'rxp'},...QR.map(e=>h('button',{onclick:()=>{closeDlg();reactMsg(m,e)}},e)),h('button',{onclick:()=>{closeDlg();emojiPicker(e=>reactMsg(m,e))}},'+')),...b.map(([k,f])=>h('button',{onclick:()=>{closeDlg();f()}},t(k)))))}
 function editMsg(m){const ta=h('textarea',{rows:3});ta.value=m.content;
   openDlg(h('div',{class:'mn'},ta,h('button',{class:'btn',onclick:async()=>{const v=ta.value.trim();if(!v)return;const{error}=await sb.from('messages').update({content:v,edited_at:new Date().toISOString()}).eq('id',m.id);closeDlg();error?toast(error.message):loadAll()}},t('save'))));ta.focus()}
 function newGroup(){const sel=new Set(),inp=h('input',{placeholder:t('gname'),maxlength:40});
@@ -1007,6 +1018,7 @@ const ICONS={
  media:'<path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5z"/>',
  friends:'<path d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05A4.2 4.2 0 0 1 17 16.5V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>',
  settings:'<path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/>'};
+ICONS.like='<path d="M1 21h4V9H1zm22-11a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L14.17 1 7.59 7.59A2 2 0 0 0 7 9v10a2 2 0 0 0 2 2h9a2 2 0 0 0 1.8-1.1l3.02-7.05c.1-.23.18-.48.18-.75z"/>';
 const ico=(k,sz=16)=>{const e=document.createElement('span');e.innerHTML='<svg viewBox="0 0 24 24" width="'+sz+'" height="'+sz+'" fill="currentColor" style="vertical-align:-3px">'+ICONS[k]+'</svg>';return e.firstChild};
 function histBlock(){const li={id:0,en:1,ja:2}[lang];
   return h('div',{class:'set'},h('p',{},t('hist')),...Object.keys(CL).sort((a,b)=>cmpV(b,a)).map((v,i)=>h('details',{open:i===0?'':null},h('summary',{},t('ver')+' '+v),h('ul',{class:'nl'},...CL[v].split('\n').map(r=>h('li',{},r.split('|')[li]||r.split('|')[0]))))))}
@@ -1073,7 +1085,8 @@ async function checkInstall(){if(standalone()||!/Android|iPhone|iPad|iPod/i.test
     h('button',{class:'ghost',onclick:closeDlg},t('later'))))}
 const RXE=['❤️','😂','😮','😢','👍','🔥'];
 const rxBtns=x=>RXE.map(e=>h('button',{class:'ghost'+((S.sr.find(z=>z.story_id===x.id&&z.user_id===S.me)||{}).emoji===e?' on':''),onclick:()=>reactStory(x,e)},e));
-async function reactStory(x,e){const{error}=await sb.from('story_reacts').upsert({story_id:x.id,emoji:e},{onConflict:'story_id,user_id'});if(error)return toast(error.message);
+async function reactStory(x,e){const ex=S.sr.find(z=>z.story_id===x.id&&z.user_id===S.me);let{error}=ex?await sb.from('story_reacts').update({emoji:e}).eq('story_id',x.id).eq('user_id',S.me):await sb.from('story_reacts').insert({story_id:x.id,emoji:e});
+  if(error&&error.code==='23505')({error}=await sb.from('story_reacts').update({emoji:e}).eq('story_id',x.id).eq('user_id',S.me));if(error)return toast(error.message);
   S.sr=S.sr.filter(z=>!(z.story_id===x.id&&z.user_id===S.me));S.sr.push({story_id:x.id,user_id:S.me,emoji:e});document.querySelectorAll('.rx button').forEach(b=>b.classList.toggle('on',b.textContent===e))}
 /* ---- postingan: reaksi, komentar, balas, foto dan stiker ---- */
 const RX=[['like','👍'],['love','❤️'],['haha','😂'],['wow','😮'],['sad','😢'],['angry','😡']],rxEm=k=>(RX.find(r=>r[0]===k)||RX[0])[1];
@@ -1084,7 +1097,7 @@ function postEl2(x){const lk=FD.lk.filter(l=>l.post_id===x.id),mine=lk.find(l=>l
     x.content?h('p',{class:'pt'},...mparts(x.content)):h('span'),
     x.image_url?h('img',{class:'pimg',src:x.image_url,alt:'',onclick:()=>openUrl(x.image_url)}):h('span'),
     h('div',{class:'ps'},lk.length?h('button',{class:'link',onclick:()=>showReacts(lk)},kinds.map(rxEm).join('')+' '+lk.length):h('span'),h('button',{class:'link',onclick:()=>toggleOpen(x.id)},cm.length+' '+t('comments'))),
-    h('div',{class:'pa'},h('button',{class:'ghost'+(mine?' on':''),onclick:()=>react(x.id,mine,'like'),oncontextmenu:e=>{e.preventDefault();pickReact(x,mine)}},(mine?rxEm(mine.kind||'like'):'👍')+' '+t('likeb')),h('button',{class:'ghost',onclick:()=>toggleOpen(x.id)},t('commentb'))),
+    h('div',{class:'pa'},FD.pick===x.id?h('div',{class:'rxpill'},...RX.map(([k,e])=>h('button',{onclick:()=>{FD.pick=null;react(x.id,mine,k)}},e))):h('span'),likeBtn(x,mine),h('button',{class:'ghost',onclick:()=>toggleOpen(x.id)},ico('chats',18),' '+t('commentb'))),
     open?h('div',{class:'pc'},...top.flatMap(c=>[cmEl(x,c,false),...cm.filter(r=>r.parent_id===c.id).map(r=>cmEl(x,r,true))]),cmBox(x)):h('span'))}
 async function react(id,mine,kind){const same=mine&&(mine.kind||'like')===kind;if(mine)await sb.from('post_likes').delete().eq('post_id',id).eq('user_id',S.me);
   if(!same){const{error}=await sb.from('post_likes').insert({post_id:id,kind});if(error)return toast(error.message)}await loadFeed()}
@@ -1102,6 +1115,24 @@ async function sendCm(pid){const inp=$('ci'+pid),c=inp?inp.value.trim():'',f=FD.
   if(f){if(f.size>5*1024*1024)return toast('> 5 MB');const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''),p=S.me+'/c'+Date.now()+'.'+ext,u=await sb.storage.from('posts').upload(p,f,{contentType:f.type||'image/jpeg'});if(u.error)return toast(u.error.message);url=sb.storage.from('posts').getPublicUrl(p).data.publicUrl}
   const{error}=await sb.from('post_comments').insert({post_id:pid,content:c,parent_id:rt?rt.parent:null,image_url:url,sticker:st||null});if(error)return toast(error.message);FD.cmImg=null;FD.cmSt=null;FD.rt=null;await loadFeed()}
 async function delCm(c){const{error}=await sb.from('post_comments').delete().eq('id',c.id);error?toast(error.message):await loadFeed()}
+const QR=['👍','❤️','😂','😮','😢','🙏'];
+const EMO='😀😃😄😁😆😅😂🤣🙂😉😊😇🥰😍🤩😘😋😛😜🤪😎🤓🥳😏😒😞😔😟😕🙁😣😖😫😩🥺😢😭😤😠😡🤬🤯😳🥵🥶😱😨😰😥😓🤗🤔🤭🤫😶😐😑😬🙄😯😮😲😴🤤😪🥱🤐🥴🤢🤮🤧😷🤒🤕👍👎👌✌️🤞🤟🤘👏🙌🙏💪👀❤️🧡💛💚💙💜🖤💔💯🔥✨🎉🎂🍕☕⚽🎮🚀🌟💀👻🤡💩';
+function emojiPicker(cb){const seg=new Intl.Segmenter(undefined,{granularity:'grapheme'}),list=[...seg.segment(EMO)].map(x=>x.segment);
+  const inp=h('input',{placeholder:'😀 …',oninput:e=>{const v=[...seg.segment(e.target.value)][0];if(v&&/\p{Extended_Pictographic}/u.test(v.segment)){closeDlg();cb(v.segment)}}});
+  openDlg(h('div',{class:'mn'},inp,h('div',{class:'sp',style:'position:static;display:grid;width:auto;box-shadow:none;border:0;padding:0;max-height:16rem'},...list.map(e=>h('button',{type:'button',onclick:()=>{closeDlg();cb(e)}},e)))))}
+async function reactMsg(m,e){const mine=S.mr.find(z=>z.message_id===m.id&&z.user_id===S.me);let error;
+  if(mine&&mine.emoji===e)({error}=await sb.from('message_reactions').delete().eq('message_id',m.id).eq('user_id',S.me));
+  else if(mine)({error}=await sb.from('message_reactions').update({emoji:e}).eq('message_id',m.id).eq('user_id',S.me));
+  else({error}=await sb.from('message_reactions').insert({message_id:m.id,emoji:e}));
+  error?toast(error.message):loadAll()}
+function rxChips(m,rr){const g={};rr.forEach(z=>(g[z.emoji]=g[z.emoji]||[]).push(z));
+  return h('div',{class:'rxs'},...Object.entries(g).map(([e,l])=>h('button',{class:'rxc'+(l.some(z=>z.user_id===S.me)?' on':''),onclick:ev=>{ev.stopPropagation();rxInfo(m,rr)}},e+(l.length>1?' '+l.length:''))))}
+function rxInfo(m,rr){const mine=rr.find(z=>z.user_id===S.me);
+  openDlg(h('div',{class:'mn'},h('b',{},t('rxh')+' ('+rr.length+')'),...rr.map(z=>h('div',{class:'frow'},h('span',{class:'who'},avc(z.user_id),nm(z.user_id)),h('span',{style:'font-size:1.3rem'},z.emoji))),
+    mine?h('button',{class:'ghost',onclick:()=>{closeDlg();reactMsg(m,mine.emoji)}},t('rxdel')):h('span')))}
+const likeBtn=(x,mine)=>{let tm;return h('button',{class:'ghost lkb'+(mine?' on':''),onclick:()=>{FD.pick=null;react(x.id,mine,'like')},oncontextmenu:e=>{e.preventDefault();FD.pick=x.id;render()},onmouseenter:()=>{tm=setTimeout(()=>{if(FD.pick!==x.id){FD.pick=x.id;render()}},450)},onmouseleave:()=>clearTimeout(tm)},
+  mine&&(mine.kind||'like')!=='like'?h('span',{style:'font-size:1.15rem'},rxEm(mine.kind)):ico('like',18),' '+t('likeb'))};
+document.addEventListener('click',e=>{if(FD.pick&&!e.target.closest('.rxpill,.lkb')){FD.pick=null;render()}});
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
