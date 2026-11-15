@@ -204,6 +204,11 @@ audio.vn{width:min(14rem,60vw);height:2.2rem;display:block;margin-top:.2rem}
 .cb{position:absolute;bottom:2.2rem;left:0;right:0;display:flex;justify-content:center;gap:1rem;z-index:3}
 .cb button{width:3.6rem;height:3.6rem;border-radius:50%;border:0;font-size:1.4rem;cursor:pointer;background:#ffffff26;color:#fff}.cb .red{background:#e53935}.cb .grn{background:#2e7d32}
 @media(max-width:899px){input,textarea{font-size:16px}.msgs{padding:1rem .8rem}.pane h2,#side h2{font-size:1.3rem}.conv{padding:.75rem .5rem}.mn{border-radius:18px}}
+#composer #send{width:2.8rem;padding:0;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.sta{background:transparent;border:0;color:#fff;text-align:center;font:inherit;resize:none;width:100%;outline:0}.sta::placeholder{color:#fff9}
+.swt{display:flex;gap:.5rem}.swt button{width:2rem;height:2rem;border-radius:50%;border:2px solid #fff6;cursor:pointer;padding:0}
+details summary{cursor:pointer;padding:.3rem 0;font-weight:600}
+@media(max-width:899px){#nav{overflow-x:auto}.tab{flex:0 0 auto;min-width:4.4rem}}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -253,12 +258,12 @@ audio.vn{width:min(14rem,60vw);height:2.2rem;display:block;margin-top:.2rem}
     <form id="composer" hidden>
       <button id="pick" type="button" aria-label="+">+</button>
       <button id="stb" type="button" aria-label="Sticker">☺</button>
-      <button id="mic" type="button" aria-label="Voice note">🎤</button>
+      <button id="mic" type="button" aria-label="Voice note"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></button>
       <div class="sp" id="sp" hidden></div>
       <div class="mpl" id="mp" hidden></div>
       <input id="file" type="file" multiple hidden>
       <textarea id="draft" rows="1" data-ph="msg"></textarea>
-      <button class="btn" type="submit" id="send" data-i="send"></button>
+      <button class="btn" type="submit" id="send" aria-label="Send"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
     </form>
   </main>
 </div>
@@ -427,7 +432,14 @@ voice|Suara|Voice|音声
 hang|Tutup|End|終了
 mute|Bisukan|Mute|ミュート
 cam|Kamera|Camera|カメラ
-callend|Panggilan berakhir|Call ended|通話終了`;
+callend|Panggilan berakhir|Call ended|通話終了
+feed|Postingan|Posts|投稿
+postph|Apa yang kamu pikirkan?|What's on your mind?|いまどうしてる？
+commentph|Tulis komentar...|Write a comment...|コメントを書く
+nofeed|Belum ada postingan|No posts yet|投稿はまだありません
+storytw|Tulis story|Write story|ストーリーを書く
+hist|Riwayat pembaruan|Update history|更新履歴
+vn|Voice note|Voice note|ボイスメッセージ`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -438,8 +450,12 @@ function applyTheme(){const d=document.documentElement,a=pref('accent');d.datase
 const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
-const VER='0.15';
-const CL={'0.15':`Telepon suara dan video antar teman (obrolan pribadi)|Voice and video calls between friends (private chats)|友だちとの音声・ビデオ通話（個人チャット）
+const VER='0.16';
+const CL={'0.16':`Postingan seperti Facebook: tulis atau unggah foto, semua pengguna bisa melihat, menyukai, dan berkomentar|Facebook-style posts: write or upload a photo, everyone can view, like and comment|Facebook風の投稿：文章や写真を投稿、全員が閲覧・いいね・コメント可能
+Ikon kirim pesawat kertas dan ikon voice note baru|New paper-plane send icon and voice note icon|紙飛行機の送信アイコンと新しいボイスメッセージアイコン
+Layar Tulis story yang lebih bagus|A better Write story screen|より使いやすいストーリー作成画面
+Riwayat pembaruan di Setelan|Update history in Settings|設定に更新履歴を追加`,
+'0.15':`Telepon suara dan video antar teman (obrolan pribadi)|Voice and video calls between friends (private chats)|友だちとの音声・ビデオ通話（個人チャット）
 Tampilan dirapikan: jarak, bayangan, dan ukuran sentuh di HP|Polished UI: spacing, shadows and touch sizes on mobile|見た目を調整：余白・影・モバイルのタップサイズ`,
 '0.14':`Balasan bisa diketuk untuk melompat ke pesan asli, dan orang yang dibalas ditandai @|Tap a reply to jump to the original message; the person you reply to gets an @ mention|返信をタップして元のメッセージへ移動、返信相手には@通知
 Latar obrolan dari foto sendiri dengan pengaturan tingkat gelap|Chat background from your own photo with a darkness slider|自分の写真をチャット背景に（暗さ調整付き）
@@ -455,7 +471,7 @@ Temukan orang dan profil dengan jumlah teman|Find people and profiles with frien
 Pesan dihapus, sedang mengetik, badge Founder dan Grup|Deleted messages, typing bubble, Founder and Group badges|削除表示・入力中バブル・Founderとグループのバッジ
 Stiker foto dari admin|Photo stickers from admins|管理者のフォトスタンプ`};
 const cmpV=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){const d=(x[i]||0)-(y[i]||0);if(d)return d}return 0};
-const TABS=['chats','global','notif','media','friends','settings'];
+const TABS=['chats','global','feed','notif','media','friends','settings'];
 const GID='00000000-0000-0000-0000-0000000000a1',GK='g:'+GID,PF='id,username,display_name,bio,avatar_url,is_admin,name_color,name_fx,frame,last_seen,is_founder,name_font';
 const isG=id=>typeof id==='string'&&id.startsWith('g:');
 const peerOf=m=>m.group_id?'g:'+m.group_id:m.sender_id===S.me?m.recipient_id:m.sender_id;
@@ -471,7 +487,7 @@ const friends=()=>S.fr.filter(f=>f.status==='accepted').map(other);
 const isImg=n=>/\.(jpe?g|png|gif|webp|avif)$/i.test(n);
 const size=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB';
 const hm=i=>{const d=new Date(i);return d.toDateString()===new Date().toDateString()?d.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString(lang,{day:'numeric',month:'short'})};
-const preview=m=>m.deleted_at?t('deleted'):m.kind==='voice'?'🎤 '+m.content:m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
+const preview=m=>m.deleted_at?t('deleted'):m.kind==='voice'?t('vn')+' '+m.content:m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.i);toast.i=setTimeout(()=>e.classList.remove('show'),2600)}
 function show(n){['auth','setup','mt','app'].forEach(i=>$(i).hidden=i!==n)}
 
@@ -536,7 +552,7 @@ function render(){
   renderSide();
   const chat=(S.tab==='chats'&&S.peer)||S.tab==='global';$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');$('main').classList.toggle('img',pref('bg')==='img'&&!!pref('bgimg'));applyBg();$('chead').style.cursor=S.peer&&S.peer!==S.me&&S.peer!==GK?'pointer':'';
   if(S.tab==='chats'||S.tab==='global')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
-  else if(S.tab==='media')renderMedia();else if(S.tab==='notif')renderNotif();else if(S.tab==='friends')renderFriends();else renderSettings();
+  else if(S.tab==='media')renderMedia();else if(S.tab==='notif')renderNotif();else if(S.tab==='feed')renderFeed();else if(S.tab==='friends')renderFriends();else renderSettings();
   drawRp(chat);markRead();
 }
 function renderSide(){
@@ -547,7 +563,7 @@ function renderSide(){
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
 function bubble(m){
   const mine=m.sender_id===S.me,c=[],g=!!m.group_id;if(g&&!mine)c.push(h('div',{class:'sn'},nm(m.sender_id)));if(m.reply_to&&!m.deleted_at)c.push(quoteEl(m));
-  if(m.deleted_at)c.push(h('span',{class:'tx dl'},t('deleted')));else if(m.kind==='voice')c.push(h('div',{},'🎤 ',h('small',{},m.content),voiceEl(m)));else if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
+  if(m.deleted_at)c.push(h('span',{class:'tx dl'},t('deleted')));else if(m.kind==='voice')c.push(h('div',{},ico('mic'),' ',h('small',{},m.content),voiceEl(m)));else if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
   else if(m.kind==='sticker')c.push(/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(m.content)?h('img',{class:'stkimg',src:m.content,alt:''}):h('span',{class:'stk'},m.content));
   else if(m.kind==='link'&&/^https?:\/\//i.test(m.content))c.push(h('a',{href:m.content,target:'_blank',rel:'noopener noreferrer'},m.content));
   else c.push(h('span',{class:'tx'},...mparts(m.content)));
@@ -596,6 +612,7 @@ function renderSettings(){
     h('p',{},t('mine')),h('div',{class:'acts'},h('input',{type:'color',value:pref('mine')||'#7f9bff',oninput:e=>{pref('mine',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('mine',null);applyTheme();render()}},t('reset'))));
   const inst=ip?h('div',{class:'set'},h('button',{class:'btn',onclick:async()=>{ip.prompt();await ip.userChoice;ip=null;render()}},t('install'))):h('span');
   const bgb=bgBlock(seg);
+  const hist=histBlock();
   const mtb=S.prof.is_founder?mtBlock():h('span');
   const usb=S.prof.is_admin?usersBlock():h('span');
   const fxb=S.prof.is_admin?fxBlock():h('span');
@@ -605,7 +622,7 @@ function renderSettings(){
     h('div',{class:'set'},h('p',{},t('accent')),h('div',{class:'acts'},h('input',{type:'color',value:pref('accent')||'#7f9bff',oninput:e=>{pref('accent',e.target.value);applyTheme()}}),h('button',{class:'ghost',onclick:()=>{pref('accent',null);applyTheme();render()}},t('reset')))),
     bub,bgb,
     h('div',{class:'set'},h('p',{},t('lang')),seg([['id','Indonesia'],['en','English'],['ja','日本語']],lang,v=>{lang=v;pref('lang',v);applyLang()})),
-    inst,fxb,adm,usb,mtb,
+    inst,fxb,adm,usb,mtb,hist,
     h('button',{class:'ghost',onclick:()=>sb.auth.signOut()},t('logout')),h('p',{style:'text-align:center;color:var(--mut);font-size:.85rem;margin-top:1rem'},'Oper v'+VER+' · ',h('button',{class:'link',onclick:()=>showNews('')},t('seenews'))));
 }
 
@@ -723,7 +740,7 @@ const live=()=>S.st.filter(x=>new Date(x.expires_at)>Date.now());
 function storyBar(){const by={};live().forEach(x=>(by[x.user_id]=by[x.user_id]||[]).push(x));
   const un=l=>l.some(x=>x.user_id!==S.me&&!S.sv.has(x.id));
   const ids=Object.keys(by).filter(i=>i!==S.me).sort((a,b)=>un(by[b])-un(by[a]));
-  const item=(id,l)=>h('button',{class:'si',onclick:()=>l.length?openStory(id):addStory()},h('span',{class:'rg'+(un(l)?' un':l.length?' seen':'')},av(id)),h('small',{},id===S.me?t('mystory'):uname(id)),id===S.me&&!l.length?h('i',{class:'pl'},'+'):null);
+  const item=(id,l)=>h('button',{class:'si',onclick:()=>l.length?openStory(id):addStory2()},h('span',{class:'rg'+(un(l)?' un':l.length?' seen':'')},av(id)),h('small',{},id===S.me?(l.length?t('mystory'):t('storytw')):uname(id)),id===S.me&&!l.length?h('i',{class:'pl'},'+'):null);
   return h('div',{class:'sb'},item(S.me,by[S.me]||[]),...ids.map(i=>item(i,by[i])))}
 function addStory(){let bg='#2b50ff';const cols=['#2b50ff','#7c3aed','#db2777','#059669','#d97706','#111827'],
   ta=h('textarea',{rows:3,maxlength:500,placeholder:t('storyph')}),sw=h('div',{class:'seg'});
@@ -902,7 +919,52 @@ function drawCall(){const o=$('call');if(!K){o.hidden=true;o.replaceChildren();r
   const at=KS&&KS.getAudioTracks()[0],vt_=KS&&KS.getVideoTracks()[0];
   const bt=(cls,txt,fn,dim)=>{const b=h('button',{class:cls,onclick:fn},txt);if(dim)b.style.opacity='.45';return b};
   o.replaceChildren(h('div',{class:'cw'},rv,K.video&&K.remote?h('span'):h('div',{class:'cav'},h('span',{class:'big'},av(K.peer)),h('b',{style:'font-size:1.4rem'},name(K.peer)),h('small',{},(st?st+' · ':'')+t(K.video?'video':'voice'))),K.video&&KS?lv:h('span'),
-    h('div',{class:'cb'},...(K.state==='incoming'?[bt('grn','📞',acceptCall),bt('red','✖',()=>endCall(true))]:[bt('','🎤',()=>{if(at){at.enabled=!at.enabled;drawCall()}},at&&!at.enabled),...(K.video&&vt_?[bt('','🎥',()=>{vt_.enabled=!vt_.enabled;drawCall()},!vt_.enabled)]:[]),bt('red','✖',()=>endCall(true))]))))}
+    h('div',{class:'cb'},...(K.state==='incoming'?[bt('grn','📞',acceptCall),bt('red','✖',()=>endCall(true))]:[bt('',ico('mic'),()=>{if(at){at.enabled=!at.enabled;drawCall()}},at&&!at.enabled),...(K.video&&vt_?[bt('','🎥',()=>{vt_.enabled=!vt_.enabled;drawCall()},!vt_.enabled)]:[]),bt('red','✖',()=>endCall(true))]))))}
+const ICONS={mic:'<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-3px"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>'};
+const ico=k=>{const e=document.createElement('span');e.innerHTML=ICONS[k];return e.firstChild};
+function histBlock(){const li={id:0,en:1,ja:2}[lang];
+  return h('div',{class:'set'},h('p',{},t('hist')),...Object.keys(CL).sort((a,b)=>cmpV(b,a)).map((v,i)=>h('details',{open:i===0?'':null},h('summary',{},t('ver')+' '+v),h('ul',{class:'nl'},...CL[v].split('\n').map(r=>h('li',{},r.split('|')[li]||r.split('|')[0]))))))}
+function addStory2(){let bg='#2b50ff';const v=$('sv'),cols=['#2b50ff','#7c3aed','#db2777','#059669','#d97706','#111827'],
+  close=()=>history.state&&history.state.st?history.back():closeSv(),
+  ta=h('textarea',{maxlength:300,placeholder:t('storyph'),class:'sta',rows:4}),sw=h('div',{class:'swt'}),box=h('div',{class:'stx'},ta),
+  paint=()=>{box.style.background=bg;sw.replaceChildren(...cols.map(c=>h('button',{type:'button',style:'background:'+c+(bg===c?';outline:3px solid #fff':''),onclick:()=>{bg=c;paint()}})))},
+  pick=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{const f=e.target.files[0];if(f){close();upStory(f,ta.value.trim())}}});
+  paint();
+  v.replaceChildren(h('div',{class:'sw'},box,h('div',{class:'sh2'},h('b',{},t('storytw')),h('button',{class:'ghost',onclick:close},'×')),
+    h('div',{class:'ft'},sw,h('span',{class:'acts'},h('button',{class:'ghost',onclick:()=>pick.click()},t('photo')),h('button',{class:'btn sm',onclick:()=>{const x=ta.value.trim();if(!x)return;close();postStory({kind:'text',content:x,bg})}},t('post'))))),pick);
+  v.hidden=false;history.pushState({st:1},'');ta.focus()}
+/* ---- postingan ---- */
+const FD={po:[],lk:[],cm:[],loaded:false,loading:false,open:new Set(),img:null};
+async function loadFeed(){FD.loading=true;
+  const{data:po}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(40);FD.po=po||[];
+  const ids=FD.po.map(x=>x.id),[lk,cm]=ids.length?await Promise.all([sb.from('post_likes').select('*').in('post_id',ids),sb.from('post_comments').select('*').in('post_id',ids).order('created_at')]):[{data:[]},{data:[]}];
+  FD.lk=lk.data||[];FD.cm=cm.data||[];
+  const need=[...new Set([...FD.po.map(x=>x.user_id),...FD.cm.map(x=>x.user_id)])].filter(i=>i&&!S.pp[i]);
+  if(need.length){const r=await sb.from('profiles').select(PF).in('id',need);(r.data||[]).forEach(x=>{S.pf[x.id]=x.username;S.pp[x.id]=x})}
+  FD.loaded=true;FD.loading=false;if(S.tab==='feed')render()}
+function renderFeed(){const bd=$('body');bd.className='pane narrow';if(!FD.loaded&&!FD.loading)loadFeed();
+  const keep=($('pt')||{}).value||'',ta=h('textarea',{id:'pt',rows:3,maxlength:2000,placeholder:t('postph')}),
+  pf=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{FD.img=e.target.files[0]||null;render()}});
+  bd.replaceChildren(h('h2',{},t('feed')),
+    h('div',{class:'set'},ta,FD.img?h('small',{style:'color:var(--mut)'},FD.img.name):h('span'),pf,h('div',{class:'acts',style:'margin-top:.5rem;justify-content:space-between'},h('button',{class:'ghost',type:'button',onclick:()=>pf.click()},t('photo')),h('button',{class:'btn sm',onclick:newPost},t('post')))),
+    ...(FD.po.length?FD.po.map(postEl):[h('p',{class:'empty'},FD.loaded?t('nofeed'):'…')]));
+  ta.value=keep}
+function postEl(x){const lk=FD.lk.filter(l=>l.post_id===x.id),me=lk.some(l=>l.user_id===S.me),cm=FD.cm.filter(c=>c.post_id===x.id),open=FD.open.has(x.id);
+  const ci=h('input',{placeholder:t('commentph'),maxlength:500,onkeydown:e=>{if(e.key==='Enter'&&e.target.value.trim())addComment(x.id,e.target.value.trim())}});
+  return h('div',{class:'set'},h('div',{class:'frow',style:'border:0;padding:0 0 .5rem'},h('span',{class:'who'},avc(x.user_id),nm(x.user_id),h('small',{style:'color:var(--mut)'},hm(x.created_at))),x.user_id===S.me||S.prof.is_admin?h('button',{class:'ghost',onclick:()=>delPost(x)},t('del')):h('span')),
+    x.content?h('p',{style:'margin:0 0 .5rem;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font-size:1rem;font-weight:400'},...mparts(x.content)):h('span'),
+    x.image_url?h('img',{src:x.image_url,alt:'',style:'width:100%;border-radius:12px;margin-bottom:.5rem;cursor:zoom-in',onclick:()=>openUrl(x.image_url)}):h('span'),
+    h('div',{class:'acts'},h('button',{class:'ghost',onclick:()=>likePost(x.id,me)},(me?'♥ ':'♡ ')+lk.length),h('button',{class:'ghost',onclick:()=>{open?FD.open.delete(x.id):FD.open.add(x.id);render()}},'💬 '+cm.length)),
+    open?h('div',{style:'margin-top:.6rem;display:grid;gap:.4rem'},...cm.map(c=>h('div',{style:'font-size:.9rem'},nm(c.user_id),' ',c.content)),ci):h('span'))}
+async function newPost(){const c=$('pt').value.trim(),f=FD.img;if(!c&&!f)return;let url=null;
+  if(f){if(f.size>5*1024*1024)return toast('> 5 MB');const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''),p=S.me+'/'+Date.now()+'.'+ext;
+    const u=await sb.storage.from('posts').upload(p,f,{contentType:f.type||'image/jpeg'});if(u.error)return toast(u.error.message);url=sb.storage.from('posts').getPublicUrl(p).data.publicUrl}
+  const{error}=await sb.from('posts').insert({content:c,image_url:url});if(error)return toast(error.message);FD.img=null;$('pt').value='';await loadFeed()}
+async function likePost(id,me){const{error}=await(me?sb.from('post_likes').delete().eq('post_id',id).eq('user_id',S.me):sb.from('post_likes').insert({post_id:id}));if(error)return toast(error.message);await loadFeed()}
+async function addComment(id,c){const{error}=await sb.from('post_comments').insert({post_id:id,content:c});if(error)return toast(error.message);await loadFeed()}
+async function delPost(x){if(x.image_url&&x.user_id===S.me){const p=x.image_url.split('/object/public/posts/')[1];if(p)await sb.storage.from('posts').remove([p])}
+  const{error}=await sb.from('posts').delete().eq('id',x.id);if(error)return toast(error.message);await loadFeed()}
+function openUrl(u){const lb=$('lb');lb.replaceChildren(h('img',{src:u,alt:'',onclick:e=>e.stopPropagation()}));lb.onclick=()=>history.state&&history.state.lb?history.back():closeLb();lb.hidden=false;history.pushState({lb:1},'')}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
