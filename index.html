@@ -219,6 +219,23 @@ details summary{cursor:pointer;padding:.3rem 0;font-weight:600}
 .cn{position:absolute;left:.5rem;bottom:.4rem;background:#0008;border-radius:8px;padding:.05rem .4rem}
 .cb button svg{display:block;margin:auto}
 @media(max-width:899px){#nav{overflow:visible}.tab{flex:1;min-width:0;padding:.75rem 0}.tl{display:none}body.open #main{animation:tin .28s cubic-bezier(.2,.8,.2,1)}}
+.sys{align-self:center;background:var(--sf2);color:var(--mut);font-size:.8rem;padding:.25rem .8rem;border-radius:12px;margin:.3rem 0;text-align:center}
+.ft.rx{justify-content:center;gap:.4rem}.rx button{font-size:1.3rem;padding:.2rem .5rem}.rx .ghost.on{background:#fff3}
+.post{background:var(--sf);border:1px solid var(--line);border-radius:16px;margin-bottom:1rem;overflow:hidden}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem}.pn{display:grid;line-height:1.2}.pn small{color:var(--mut);font-weight:400}
+.pt{margin:0;padding:0 1rem .8rem;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1.02rem}
+.pimg{width:100%;max-height:28rem;object-fit:cover;display:block;cursor:zoom-in}
+.ps{display:flex;justify-content:space-between;padding:.5rem 1rem;color:var(--mut);font-size:.9rem}
+.pa{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}.pa .ghost{border:0;border-radius:0;padding:.7rem}.pa .ghost.on{color:var(--accent)}
+.pc{padding:.6rem 1rem 1rem;display:grid;gap:.6rem;border-top:1px solid var(--line)}
+.cm2{display:flex;gap:.5rem;align-items:flex-start}.cm2 .av{width:2rem;height:2rem;font-size:.8rem;flex-shrink:0}.cm2.rp{margin-left:2.4rem}
+.cbub{background:var(--sf2);border-radius:14px;padding:.45rem .7rem;min-width:0;overflow-wrap:anywhere}.cbub b{display:block;font-size:.85rem}
+.cbub img{max-width:100%;border-radius:10px;margin-top:.3rem;display:block}.cact{display:flex;gap:.7rem;align-items:center;margin-top:.1rem}.cb2{display:grid;gap:.3rem}
+.rxp{display:flex!important;flex-direction:row;justify-content:center;gap:.3rem}.rxp button{font-size:1.8rem;background:none;border:0;cursor:pointer;border-radius:10px}
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+.fr-founder::before{content:"";position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(from var(--a),#ffd76a,#ff7bd5,#7b9bff,#5ef0c0,#ffd76a);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:fa 3s linear infinite;filter:drop-shadow(0 0 6px #ffd76a99);pointer-events:none}
+@keyframes fa{to{--a:360deg}}
+@media(prefers-reduced-motion:reduce){.fr-founder::before{animation:none}}
 @media(max-width:899px){
   #app{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
   #nav{grid-row:2;grid-column:1;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:.35rem}
@@ -454,7 +471,25 @@ info|Info|Info|情報
 minfo|Info pesan|Message info|メッセージ情報
 readby|Dibaca oleh|Read by|既読
 notread|Belum membaca|Not read yet|未読
-callmax|Maksimal 6 orang dalam satu panggilan|Max 6 people per call|1回の通話は最大6人まで`;
+callmax|Maksimal 6 orang dalam satu panggilan|Max 6 people per call|1回の通話は最大6人まで
+s_add|{a} menambahkan {b}|{a} added {b}|{a}が{b}を追加しました
+s_kick|{a} mengeluarkan {b}|{a} removed {b}|{a}が{b}を削除しました
+s_ren|{a} mengganti nama grup menjadi "{b}"|{a} changed the group name to "{b}"|{a}がグループ名を「{b}」に変更しました
+s_photo|{a} mengganti foto grup|{a} changed the group photo|{a}がグループ写真を変更しました
+s_leave|{a} keluar dari grup|{a} left the group|{a}がグループを退出しました
+nametaken|Nama sudah dipakai|Name is already taken|その名前は使われています
+apkt|Unduh aplikasi Oper|Get the Oper app|Operアプリをダウンロード
+apkd|Oper lebih nyaman dipakai lewat aplikasi (layar penuh). Versi web tetap bisa dipakai.|Oper is smoother as an app (full screen). The web version still works.|アプリならより快適です（全画面）。ウェブ版も引き続き使えます。
+apks|Aman: aplikasi ini hanya pembungkus yang membuka situs Oper, tanpa kode tambahan§Izin aplikasi hanya notifikasi (saat ini Oper belum mengirim notifikasi); mikrofon dan kamera hanya diminta browser saat kamu menelepon atau merekam§Kode Oper terbuka di GitHub dan APK ditandatangani dengan sidik jari di bawah§Pesan disimpan di server Oper (Supabase) agar tampil di semua perangkat dan belum dienkripsi ujung ke ujung§Android akan memperingatkan "sumber tidak dikenal" karena APK ini tidak lewat Play Store, itu normal|Safe: the app is only a wrapper that opens the Oper website, with no extra code§The app's only permission is notifications (Oper does not send push notifications yet); the browser asks for mic and camera only when you call or record§Oper's code is open on GitHub and the APK is signed with the fingerprint below§Messages are stored on Oper's server (Supabase) so they show on all devices and are not end-to-end encrypted§Android warns about "unknown sources" because this APK is not from the Play Store, which is normal|安全：このアプリはOperのサイトを開くだけのラッパーで、追加のコードはありません§アプリの権限は通知のみです（現在Operはプッシュ通知を送信していません）。マイクとカメラは通話や録音の時にブラウザが確認します§OperのコードはGitHubで公開され、APKは下記の指紋で署名されています§メッセージはOperのサーバー（Supabase）に保存され、エンドツーエンド暗号化はされていません§Playストア外のAPKのため、Androidが「提供元不明」と警告しますが、正常です
+apkfp|Sidik jari tanda tangan|Signing fingerprint|署名フィンガープリント
+apkdl|Unduh APK|Download APK|APKをダウンロード
+apkios|Di iPhone: buka menu Bagikan lalu Tambahkan ke Layar Utama.|On iPhone: tap Share, then Add to Home Screen.|iPhone：共有 → ホーム画面に追加
+later|Nanti saja|Later|あとで
+apkna|File aplikasi belum tersedia, coba lagi nanti.|The app file is not available yet, please try again later.|アプリのファイルはまだ利用できません。後でもう一度お試しください。
+comments|komentar|comments|コメント
+commentb|Komentar|Comment|コメント
+likeb|Suka|Like|いいね
+replyto|Membalas|Replying to|返信先`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -462,11 +497,16 @@ const t=k=>T[lang][k]||T.en[k]||k;
 const ink=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*299+(n>>8&255)*587+(n&255)*114)/1000>150?'#000':'#fff'};
 function applyTheme(){const d=document.documentElement,a=pref('accent');d.dataset.theme=pref('theme')||'black';d.dataset.bub=pref('bub')||'round';const mi=pref('mine');if(mi){d.style.setProperty('--mine',mi);d.style.setProperty('--mon',ink(mi))}else{d.style.removeProperty('--mine');d.style.removeProperty('--mon')}if(a){d.style.setProperty('--accent',a);d.style.setProperty('--on',ink(a))}else{d.style.removeProperty('--accent');d.style.removeProperty('--on')}}
 
-const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],mf:'all'};
+const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],sr:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
-const VER='0.17';
-const CL={'0.17':`Menu bawah jadi ikon khusus dan animasi pindah tab lebih halus|Bottom menu is now custom icons with smoother tab animation|下部メニューをオリジナルアイコンに、タブ切り替えを滑らかに
+const VER='0.18';
+const CL={'0.18':`Pemberitahuan di grup saat anggota ditambah atau dikeluarkan, dan saat nama atau foto grup diganti|Group notices when members are added or removed, or the name or photo changes|グループのメンバー追加・削除、名前・写真の変更をお知らせ
+Postingan lebih rapi: reaksi ala Facebook, balas komentar, komentar foto dan stiker, dan daftar yang bereaksi|Cleaner posts: Facebook-style reactions, comment replies, photo and sticker comments, and who reacted|投稿を整理：Facebook風リアクション・コメント返信・写真/スタンプ付きコメント・リアクションした人の一覧
+Reaksi untuk story|Story reactions|ストーリーにリアクション
+Username dan nama tidak boleh sama, serta bingkai khusus Founder|Unique usernames and names, plus a special Founder frame|ユーザー名・名前の重複禁止とFounder専用フレーム
+Ajakan unduh aplikasi untuk pengguna web|Prompt to download the app for web users|ウェブ利用者向けアプリのダウンロード案内`,
+'0.17':`Menu bawah jadi ikon khusus dan animasi pindah tab lebih halus|Bottom menu is now custom icons with smoother tab animation|下部メニューをオリジナルアイコンに、タブ切り替えを滑らかに
 Telepon dan video call grup (sampai 6 orang) dengan ikon telepon baru|Group voice and video calls (up to 6 people) with new call icons|グループ音声・ビデオ通話（最大6人）と新しい通話アイコン
 Info pesan: lihat siapa saja yang sudah membaca pesanmu di grup|Message info: see who has read your message in groups|メッセージ情報：グループで既読の人を確認`,
 '0.16':`Postingan seperti Facebook: tulis atau unggah foto, semua pengguna bisa melihat, menyukai, dan berkomentar|Facebook-style posts: write or upload a photo, everyone can view, like and comment|Facebook風の投稿：文章や写真を投稿、全員が閲覧・いいね・コメント可能
@@ -497,7 +537,7 @@ const tgt=(id=S.peer)=>isG(id)?{group_id:id.slice(2)}:{recipient_id:id};
 const uname=id=>(S.pp[id]||{}).display_name||'@'+(S.pf[id]||'?');
 const name=id=>id===S.me?t('me'):isG(id)?((S.gr.find(g=>'g:'+g.id===id)||{}).name||'Grup'):uname(id);
 const vt=f=>document.startViewTransition?document.startViewTransition(f):f();
-const av=id=>{const p=isG(id)?(S.gr.find(g=>'g:'+g.id===id)||{}):(S.pp[id]||{}),e=h('span',{class:'av'+(/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));if(isG(id))e.classList.add('grp');return e};
+const av=id=>{const p=isG(id)?(S.gr.find(g=>'g:'+g.id===id)||{}):(S.pp[id]||{}),e=h('span',{class:'av'+(p.is_founder?' fr-founder':/^(neon|gold|rainbow)$/.test(p.frame)?' fr-'+p.frame:'')});p.avatar_url?e.append(h('img',{src:p.avatar_url,alt:''})):e.textContent=name(id).replace('@','')[0].toUpperCase();if(S.on.has(id)&&!isG(id)&&(id===S.me||friends().includes(id)||(S.prof&&S.prof.is_admin)))e.append(h('i',{class:'on'}));if(isG(id))e.classList.add('grp');return e};
 const nmx=(p,text)=>{const fx=/^(glow|pulse|shimmer|rainbow)$/.test(p.name_fx)?'fx-'+p.name_fx:'',col=/^#[0-9a-f]{6}$/i.test(p.name_color||''),e=h('b',{class:fx||(col?'fx-solid':'')},text);if(col)e.style.setProperty('--nc',p.name_color);if(FONTS[p.name_font])e.style.fontFamily=FONTS[p.name_font];return p.is_founder?h('span',{class:'nw'},e,h('i',{class:'fdr'},'👑 Founder')):p.is_admin?h('span',{class:'nw'},e,h('i',{class:'adm'},'★ Admin')):e};
 const nm=id=>isG(id)&&id!==GK?h('span',{class:'nw'},h('i',{class:'gb'},'👥 '+t('grp')),nmx({},name(id))):nmx(S.pp[id]||{},name(id));
 const other=f=>f.requester===S.me?f.addressee:f.requester;
@@ -505,7 +545,7 @@ const friends=()=>S.fr.filter(f=>f.status==='accepted').map(other);
 const isImg=n=>/\.(jpe?g|png|gif|webp|avif)$/i.test(n);
 const size=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB';
 const hm=i=>{const d=new Date(i);return d.toDateString()===new Date().toDateString()?d.toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString(lang,{day:'numeric',month:'short'})};
-const preview=m=>m.deleted_at?t('deleted'):m.kind==='voice'?t('vn')+' '+m.content:m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
+const preview=m=>m.deleted_at?t('deleted'):m.kind==='system'?sysText(m):m.kind==='voice'?t('vn')+' '+m.content:m.kind==='sticker'&&m.content.startsWith('http')?'Sticker':m.kind==='file'?'📎 '+m.content:m.content;
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.i);toast.i=setTimeout(()=>e.classList.remove('show'),2600)}
 function show(n){['auth','setup','mt','app'].forEach(i=>$(i).hidden=i!==n)}
 
@@ -538,7 +578,7 @@ async function boot(session){
   if(!data){show('setup');return}
   S.prof=data;S.pf[uid]=data.username;S.pp[uid]=data;subSettings();gate();
 }
-function enter(){if(ch){sb.removeChannel(ch);ch=null}if(pc){sb.removeChannel(pc);pc=null}show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);
+function enter(){if(ch){sb.removeChannel(ch);ch=null}if(pc){sb.removeChannel(pc);pc=null}show('app');S.peer=wide()?S.me:null;render();loadAll();setTimeout(checkNews,900);setTimeout(checkInstall,2200);
   ch=sb.channel('oper-'+S.me).on('postgres_changes',{event:'*',schema:'public',table:'messages'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'friendships'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'groups'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'group_members'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'stories'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'story_views'},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'pokes'},loadAll).subscribe();
   pc=sb.channel('online',{config:{presence:{key:S.me}}});
   pc.on('presence',{event:'sync'},()=>{S.on=new Set(Object.keys(pc.presenceState()));if(S.tab!=='settings')render()}).on('broadcast',{event:'typing'},({payload:p})=>{if(!p||p.from===S.me)return;const k=isG(p.to)?p.to:p.from;if(isG(p.to)?!S.gr.some(g=>'g:'+g.id===p.to):p.to!==S.me)return;S.ty[k]=Date.now();S.tyn[k]=p.from;if(S.tab==='chats')render();setTimeout(()=>{if(S.tab==='chats'&&!typing(k))render()},3600)}).on('broadcast',{event:'call'},({payload:p})=>onCall(p)).subscribe(st=>{if(st==='SUBSCRIBED')pc.track({at:Date.now()})});touch();clearInterval(lsT);lsT=setInterval(()=>{if(!document.hidden)touch()},60000)}
@@ -546,9 +586,9 @@ function enter(){if(ch){sb.removeChannel(ch);ch=null}if(pc){sb.removeChannel(pc)
 /* ---- data ---- */
 async function loadAll(){
   const before=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).map(f=>f.id);
-  const[m,f,gq,gmq,sq,svq,stq,pkq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*'),sb.from('stickers').select('*').order('created_at'),sb.from('pokes').select('*').order('created_at',{ascending:false}).limit(50)]);
+  const[m,f,gq,gmq,sq,svq,stq,pkq,srq]=await Promise.all([sb.from('messages').select('*').order('created_at',{ascending:false}).limit(500),sb.from('friendships').select('*').or('requester.eq.'+S.me+',addressee.eq.'+S.me),sb.from('groups').select('*'),sb.from('group_members').select('*'),sb.from('stories').select('*').order('created_at'),sb.from('story_views').select('*'),sb.from('stickers').select('*').order('created_at'),sb.from('pokes').select('*').order('created_at',{ascending:false}).limit(50),sb.from('story_reacts').select('*')]);
   if(m.error||f.error){toast((m.error||f.error).message);return}
-  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];S.stk=stq.data||[];S.pk=pkq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
+  S.msgs=m.data.reverse();S.fr=f.data;S.gr=gq.data||[];S.gm=gmq.data||[];S.st=sq.data||[];S.stk=stq.data||[];S.pk=pkq.data||[];S.sr=srq.data||[];const sv=svq.data||[];S.sv=new Set(sv.filter(r=>r.viewer_id===S.me).map(r=>r.story_id));S.svw=sv.filter(r=>r.viewer_id!==S.me);
   const ids=new Set();S.msgs.forEach(x=>{ids.add(x.sender_id);ids.add(x.recipient_id)});S.fr.forEach(x=>{ids.add(x.requester);ids.add(x.addressee)});S.gm.forEach(x=>ids.add(x.user_id));S.st.forEach(x=>ids.add(x.user_id));S.svw.forEach(x=>ids.add(x.viewer_id));S.pk.forEach(x=>ids.add(x.from_id));
   const need=[...ids].filter(Boolean);
   if(need.length){const p=await sb.from('profiles').select(PF).in('id',need);(p.data||[]).forEach(r=>{S.pf[r.id]=r.username;S.pp[r.id]=r})}
@@ -579,7 +619,7 @@ function renderSide(){
   $('side').replaceChildren(h('div',{class:'sh'},h('h2',{style:'margin:0;padding:0'},t('chats')),h('button',{class:'ghost',onclick:newGroup},'+ '+t('newgrp'))),storyBar(),...ids.map(id=>{const l=last(id);return h('button',{class:'conv'+(S.peer===id?' on':'')+(unread(id)?' un':'')+(pinIdx(id)>=0?' pn':''),oncontextmenu:e=>{e.preventDefault();pinMenu(id)},onclick:()=>{if(!wide()&&S.peer!==id)history.pushState({c:1},'');S.peer=id;$('draft').value='';vt(render)}},av(id),h('span',{class:'cm'},nm(id),h('small',{},typing(id)?t('typing'):l?preview(l):t('empty'))),l?h('span',{class:'rt'},h('time',{},hm(l.created_at)),unread(id)?h('span',{class:'ub'},(menU(id)?'@ ':'')+unread(id)):null):null)}));
 }
 function imgEl(m,c){const im=h('img',{class:c,alt:m.content,loading:'lazy'});if(imgs.has(m.id))im.src=imgs.get(m.id);else signed(m.file_path).then(u=>{if(u){imgs.set(m.id,u);im.src=u}});return im}
-function bubble(m){
+function bubble(m){if(m.kind==='system')return h('div',{class:'sys'},sysText(m));
   const mine=m.sender_id===S.me,c=[],g=!!m.group_id;if(g&&!mine)c.push(h('div',{class:'sn'},nm(m.sender_id)));if(m.reply_to&&!m.deleted_at)c.push(quoteEl(m));
   if(m.deleted_at)c.push(h('span',{class:'tx dl'},t('deleted')));else if(m.kind==='voice')c.push(h('div',{},ico('mic'),' ',h('small',{},m.content),voiceEl(m)));else if(m.kind==='file'){if(isImg(m.content)){const im=imgEl(m,'pic');im.style.cursor='zoom-in';im.onclick=()=>openImg(m);c.push(im)}c.push(h('button',{class:'file',onclick:()=>dl(m)},h('b',{},m.content),h('small',{},size(m.file_size||0)),h('u',{},t('dl'))))}
   else if(m.kind==='sticker')c.push(/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(m.content)?h('img',{class:'stkimg',src:m.content,alt:''}):h('span',{class:'stk'},m.content));
@@ -668,7 +708,7 @@ async function openImg(m){const u=imgs.get(m.id)||await signed(m.file_path);if(!
   lb.replaceChildren(h('img',{src:u,alt:m.content,onclick:e=>e.stopPropagation()}),h('div',{class:'bar'},h('button',{class:'btn sm',onclick:e=>{e.stopPropagation();dl(m)}},t('dl')),h('button',{class:'btn sm',onclick:close},'×')));lb.onclick=close;lb.hidden=false;history.pushState({lb:1},'')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lb').hidden)$('lb').click()});
 async function saveProf(){const display_name=$('dn').value.trim()||null,bio=$('bi').value.trim()||null;
-  const{error}=await sb.from('profiles').update({display_name,bio}).eq('id',S.me);if(error)return toast(error.message);
+  const{error}=await sb.from('profiles').update({display_name,bio}).eq('id',S.me);if(error)return toast(/dipakai|duplicate|23505/i.test(error.message+error.code)?t('nametaken'):error.message);
   Object.assign(S.prof,{display_name,bio});S.pp[S.me]=S.prof;toast(t('saved'));render()}
 $('af').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   const ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -740,7 +780,7 @@ async function mkGroup(name,ids){const id=crypto.randomUUID();
   let r=await sb.from('groups').insert({id,name});if(r.error)return toast(r.error.message);
   r=await sb.from('group_members').insert([S.me,...ids].map(u=>({group_id:id,user_id:u})));if(r.error)return toast(r.error.message);
   closeDlg();S.tab='chats';S.peer='g:'+id;if(!wide())history.pushState({c:1},'');await loadAll()}
-async function leaveG(){const g=S.peer.slice(2),{error}=await sb.from('group_members').delete().eq('group_id',g).eq('user_id',S.me);
+async function leaveG(){const g=S.peer.slice(2);await sysMsg(g,'leave:');const{error}=await sb.from('group_members').delete().eq('group_id',g).eq('user_id',S.me);
   if(error)return toast(error.message);S.peer=null;if(history.state&&history.state.c)history.back();await loadAll()}
 function usersBlock(){if(!S.users)loadUsers();const u=S.users||[];
   return h('div',{class:'set'},h('p',{},t('users')+' ('+u.length+', '+u.filter(x=>S.on.has(x.id)).length+' '+t('online')+')'),
@@ -752,7 +792,7 @@ const tick=m=>{if(m.sender_id!==S.me)return null;
   if(m.recipient_id===S.me)return null;return h('span',{class:'tk'+(m.read_at?' rd':'')},m.read_at?'✓✓':'✓')};
 function addMem(){const g=S.peer.slice(2),have=new Set(S.gm.filter(x=>x.group_id===g).map(x=>x.user_id)),sel=new Set();
   openDlg(h('div',{class:'mn'},h('b',{},t('addmem')),...friends().filter(id=>!have.has(id)).map(id=>h('label',{class:'chk'},h('input',{type:'checkbox',onchange:e=>e.target.checked?sel.add(id):sel.delete(id)}),av(id),uname(id))),
-    h('button',{class:'btn',onclick:async()=>{if(!sel.size)return;const{error}=await sb.from('group_members').insert([...sel].map(u=>({group_id:g,user_id:u})));closeDlg();error?toast(error.message):loadAll()}},t('save'))))}
+    h('button',{class:'btn',onclick:async()=>{if(!sel.size)return;const{error}=await sb.from('group_members').insert([...sel].map(u=>({group_id:g,user_id:u})));closeDlg();if(error)toast(error.message);else{await sysMsg(g,'add:'+[...sel].join(','));loadAll()}}},t('save'))))}
 /* ---- story ---- */
 const live=()=>S.st.filter(x=>new Date(x.expires_at)>Date.now());
 function storyBar(){const by={};live().forEach(x=>(by[x.user_id]=by[x.user_id]||[]).push(x));
@@ -786,8 +826,8 @@ function openStory(uid){const list=live().filter(x=>x.user_id===uid);if(!list.le
       h('div',{class:'sh2'},h('span',{class:'who'},av(uid),nm(uid)),h('button',{class:'ghost',onclick:close},'×')),
       h('div',{class:'tp',onclick:e=>{const r=e.currentTarget.getBoundingClientRect();go(e.clientX-r.left<r.width/3?-1:1)}}),
       uid===S.me?h('div',{class:'ft'},
-        h('button',{class:'ghost',onclick:()=>{clearTimeout(svT);openDlg(h('div',{class:'mn'},h('b',{},t('seenby')+' ('+vw.length+')'),...vw.map(r=>h('div',{class:'who'},av(r.viewer_id),uname(r.viewer_id)))))}},'👁 '+vw.length),
-        h('button',{class:'ghost',onclick:async()=>{if(x.file_path)await sb.storage.from(BUCKET).remove([x.file_path]);await sb.from('stories').delete().eq('id',x.id);close();loadAll()}},t('del'))):h('span')));
+        h('button',{class:'ghost',onclick:()=>{clearTimeout(svT);openDlg(h('div',{class:'mn'},h('b',{},t('seenby')+' ('+vw.length+')'),...vw.map(r=>h('div',{class:'frow'},h('span',{class:'who'},av(r.viewer_id),uname(r.viewer_id)),h('span',{style:'font-size:1.3rem'},(S.sr.find(z=>z.story_id===x.id&&z.user_id===r.viewer_id)||{}).emoji||'')))))}},'👁 '+vw.length),
+        h('button',{class:'ghost',onclick:async()=>{if(x.file_path)await sb.storage.from(BUCKET).remove([x.file_path]);await sb.from('stories').delete().eq('id',x.id);close();loadAll()}},t('del'))):h('div',{class:'ft rx'},...rxBtns(x))));
     svT=setTimeout(()=>go(1),5000)};
   if(v.hidden){v.hidden=false;history.pushState({st:1},'')}
   go(0)}
@@ -805,13 +845,13 @@ function groupInfo(){const g=S.gr.find(x=>'g:'+x.id===S.peer);if(!g)return;const
     ...mem.map(x=>h('div',{class:'frow'},h('span',{class:'who'},avc(x.user_id),nmx(S.pp[x.user_id]||{},uname(x.user_id)+(x.user_id===S.me?' ('+t('you')+')':'')),x.user_id===g.owner?h('i',{class:'adm'},t('owner')):h('span')),
       own&&x.user_id!==S.me?h('button',{class:'ghost',onclick:()=>rmMem(g,x.user_id)},t('kick')):h('span'))),h('button',{class:'ghost',onclick:()=>{closeDlg();addMem()}},'+ '+t('addmem')),h('button',{class:'ghost',onclick:()=>{closeDlg();leaveG()}},t('leave'))))}
 function renameG(g){const inp=h('input',{maxlength:40});inp.value=g.name;
-  openDlg(h('div',{class:'mn'},h('b',{},t('rename')),inp,h('button',{class:'btn',onclick:async()=>{const n=inp.value.trim();if(!n)return;const{error}=await sb.from('groups').update({name:n}).eq('id',g.id);closeDlg();error?toast(error.message):loadAll()}},t('save'))));inp.focus()}
+  openDlg(h('div',{class:'mn'},h('b',{},t('rename')),inp,h('button',{class:'btn',onclick:async()=>{const n=inp.value.trim();if(!n)return;const{error}=await sb.from('groups').update({name:n}).eq('id',g.id);closeDlg();if(error)toast(error.message);else{await sysMsg(g.id,'rename:'+n);loadAll()}}},t('save'))));inp.focus()}
 async function gPhoto(g,f){const ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'');
   if(ext==='gif'&&!S.prof.is_admin)return toast(t('gifonly'));if(f.size>5*1024*1024)return toast('> 5 MB');
   const path=S.me+'/group-'+g.id+'-'+Date.now()+'.'+ext,u=await sb.storage.from('avatars').upload(path,f,{contentType:f.type||'image/png'});if(u.error)return toast(u.error.message);
   const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl,{error}=await sb.from('groups').update({avatar_url:url}).eq('id',g.id);
-  error?toast(error.message):loadAll()}
-async function rmMem(g,uid){const{error}=await sb.from('group_members').delete().eq('group_id',g.id).eq('user_id',uid);closeDlg();error?toast(error.message):loadAll()}
+  if(error)return toast(error.message);await sysMsg(g.id,'photo:');loadAll()}
+async function rmMem(g,uid){const{error}=await sb.from('group_members').delete().eq('group_id',g.id).eq('user_id',uid);closeDlg();if(error)toast(error.message);else{await sysMsg(g.id,'kick:'+uid);loadAll()}}
 let lsT=null,tyT=0;
 function touch(){if(S.me)sb.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',S.me).then(()=>{})}
 addEventListener('visibilitychange',touch);
@@ -985,7 +1025,7 @@ async function loadFeed(){FD.loading=true;
   const{data:po}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(40);FD.po=po||[];
   const ids=FD.po.map(x=>x.id),[lk,cm]=ids.length?await Promise.all([sb.from('post_likes').select('*').in('post_id',ids),sb.from('post_comments').select('*').in('post_id',ids).order('created_at')]):[{data:[]},{data:[]}];
   FD.lk=lk.data||[];FD.cm=cm.data||[];
-  const need=[...new Set([...FD.po.map(x=>x.user_id),...FD.cm.map(x=>x.user_id)])].filter(i=>i&&!S.pp[i]);
+  const need=[...new Set([...FD.po.map(x=>x.user_id),...FD.cm.map(x=>x.user_id),...FD.lk.map(x=>x.user_id)])].filter(i=>i&&!S.pp[i]);
   if(need.length){const r=await sb.from('profiles').select(PF).in('id',need);(r.data||[]).forEach(x=>{S.pf[x.id]=x.username;S.pp[x.id]=x})}
   FD.loaded=true;FD.loading=false;if(S.tab==='feed')render()}
 function renderFeed(){const bd=$('body');bd.className='pane narrow';if(!FD.loaded&&!FD.loading)loadFeed();
@@ -993,7 +1033,7 @@ function renderFeed(){const bd=$('body');bd.className='pane narrow';if(!FD.loade
   pf=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{FD.img=e.target.files[0]||null;render()}});
   bd.replaceChildren(h('h2',{},t('feed')),
     h('div',{class:'set'},ta,FD.img?h('small',{style:'color:var(--mut)'},FD.img.name):h('span'),pf,h('div',{class:'acts',style:'margin-top:.5rem;justify-content:space-between'},h('button',{class:'ghost',type:'button',onclick:()=>pf.click()},t('photo')),h('button',{class:'btn sm',onclick:newPost},t('post')))),
-    ...(FD.po.length?FD.po.map(postEl):[h('p',{class:'empty'},FD.loaded?t('nofeed'):'…')]));
+    ...(FD.po.length?FD.po.map(postEl2):[h('p',{class:'empty'},FD.loaded?t('nofeed'):'…')]));
   ta.value=keep}
 function postEl(x){const lk=FD.lk.filter(l=>l.post_id===x.id),me=lk.some(l=>l.user_id===S.me),cm=FD.cm.filter(c=>c.post_id===x.id),open=FD.open.has(x.id);
   const ci=h('input',{placeholder:t('commentph'),maxlength:500,onkeydown:e=>{if(e.key==='Enter'&&e.target.value.trim())addComment(x.id,e.target.value.trim())}});
@@ -1017,6 +1057,51 @@ function msgInfo(m){const row=(id,x)=>h('div',{class:'frow'},h('span',{class:'wh
   if(!m.group_id){openDlg(h('div',{class:'mn'},h('b',{},t('minfo')),h('div',{class:'frow'},h('span',{},t('readby')),h('small',{style:'color:var(--mut)'},m.read_at?hm(m.read_at):'—'))));return}
   const mem=S.gm.filter(x=>x.group_id===m.group_id&&x.user_id!==S.me),rd=mem.filter(x=>x.last_read_at>=m.created_at),un=mem.filter(x=>x.last_read_at<m.created_at),cap=x=>h('p',{style:'margin:.4rem 0 0;color:var(--mut);font-size:.9rem'},x);
   openDlg(h('div',{class:'mn'},h('b',{},t('minfo')),cap(t('readby')+' ('+rd.length+')'),...rd.map(x=>row(x.user_id,hm(x.last_read_at))),cap(t('notread')+' ('+un.length+')'),...un.map(x=>row(x.user_id))))}
+const APK='Oper.apk';
+const sysMsg=(gid,c)=>sb.from('messages').insert({group_id:gid,kind:'system',content:c});
+function sysText(m){const i=m.content.indexOf(':'),a=m.content.slice(0,i),x=m.content.slice(i+1),who=m.sender_id===S.me?t('you'):uname(m.sender_id);
+  const nms=x.split(',').filter(Boolean).map(u=>u===S.me?t('you').toLowerCase():uname(u)).join(', ');
+  const k={add:'s_add',kick:'s_kick',rename:'s_ren',photo:'s_photo',leave:'s_leave'}[a];if(!k)return '';
+  return t(k).replace('{a}',who).replace('{b}',a==='rename'?x:nms)}
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone||document.referrer.startsWith('android-app://');
+async function checkInstall(){if(standalone()||!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent))return;if(!$('dlg').hidden){setTimeout(checkInstall,1500);return}
+  let fp='',apkOk=false;try{apkOk=(await fetch(APK,{method:'HEAD'})).ok}catch{}try{const j=await(await fetch('/.well-known/assetlinks.json')).json();fp=((j[0].target||{}).sha256_cert_fingerprints||[])[0]||''}catch{}
+  openDlg(h('div',{class:'mn'},h('b',{style:'font-size:1.2rem'},t('apkt')),h('p',{style:'margin:0;font-size:.92rem'},t('apkd')),
+    h('ul',{class:'nl',style:'font-size:.85rem'},...t('apks').split('§').map(x=>h('li',{},x))),
+    fp?h('small',{style:'color:var(--mut);word-break:break-all'},t('apkfp')+': '+fp):h('span'),
+    /Android/i.test(navigator.userAgent)?(apkOk?h('a',{class:'btn',href:APK,download:'',style:'text-align:center;text-decoration:none'},t('apkdl')):h('p',{style:'color:var(--mut);font-size:.85rem;margin:0'},t('apkna'))):h('p',{style:'color:var(--mut);font-size:.85rem;margin:0'},t('apkios')),
+    h('button',{class:'ghost',onclick:closeDlg},t('later'))))}
+const RXE=['❤️','😂','😮','😢','👍','🔥'];
+const rxBtns=x=>RXE.map(e=>h('button',{class:'ghost'+((S.sr.find(z=>z.story_id===x.id&&z.user_id===S.me)||{}).emoji===e?' on':''),onclick:()=>reactStory(x,e)},e));
+async function reactStory(x,e){const{error}=await sb.from('story_reacts').upsert({story_id:x.id,emoji:e},{onConflict:'story_id,user_id'});if(error)return toast(error.message);
+  S.sr=S.sr.filter(z=>!(z.story_id===x.id&&z.user_id===S.me));S.sr.push({story_id:x.id,user_id:S.me,emoji:e});document.querySelectorAll('.rx button').forEach(b=>b.classList.toggle('on',b.textContent===e))}
+/* ---- postingan: reaksi, komentar, balas, foto dan stiker ---- */
+const RX=[['like','👍'],['love','❤️'],['haha','😂'],['wow','😮'],['sad','😢'],['angry','😡']],rxEm=k=>(RX.find(r=>r[0]===k)||RX[0])[1];
+const toggleOpen=id=>{FD.open.has(id)?FD.open.delete(id):FD.open.add(id);render()};
+function postEl2(x){const lk=FD.lk.filter(l=>l.post_id===x.id),mine=lk.find(l=>l.user_id===S.me),cm=FD.cm.filter(c=>c.post_id===x.id),top=cm.filter(c=>!c.parent_id),open=FD.open.has(x.id),kinds=[...new Set(lk.map(l=>l.kind||'like'))].slice(0,3);
+  return h('article',{class:'post'},
+    h('div',{class:'ph'},h('span',{class:'who'},avc(x.user_id),h('span',{class:'pn'},nm(x.user_id),h('small',{},hm(x.created_at)))),x.user_id===S.me||S.prof.is_admin?h('button',{class:'ghost',onclick:()=>delPost(x)},t('del')):h('span')),
+    x.content?h('p',{class:'pt'},...mparts(x.content)):h('span'),
+    x.image_url?h('img',{class:'pimg',src:x.image_url,alt:'',onclick:()=>openUrl(x.image_url)}):h('span'),
+    h('div',{class:'ps'},lk.length?h('button',{class:'link',onclick:()=>showReacts(lk)},kinds.map(rxEm).join('')+' '+lk.length):h('span'),h('button',{class:'link',onclick:()=>toggleOpen(x.id)},cm.length+' '+t('comments'))),
+    h('div',{class:'pa'},h('button',{class:'ghost'+(mine?' on':''),onclick:()=>react(x.id,mine,'like'),oncontextmenu:e=>{e.preventDefault();pickReact(x,mine)}},(mine?rxEm(mine.kind||'like'):'👍')+' '+t('likeb')),h('button',{class:'ghost',onclick:()=>toggleOpen(x.id)},t('commentb'))),
+    open?h('div',{class:'pc'},...top.flatMap(c=>[cmEl(x,c,false),...cm.filter(r=>r.parent_id===c.id).map(r=>cmEl(x,r,true))]),cmBox(x)):h('span'))}
+async function react(id,mine,kind){const same=mine&&(mine.kind||'like')===kind;if(mine)await sb.from('post_likes').delete().eq('post_id',id).eq('user_id',S.me);
+  if(!same){const{error}=await sb.from('post_likes').insert({post_id:id,kind});if(error)return toast(error.message)}await loadFeed()}
+function pickReact(x,mine){openDlg(h('div',{class:'mn rxp'},...RX.map(([k,e])=>h('button',{onclick:()=>{closeDlg();react(x.id,mine,k)}},e))))}
+function showReacts(lk){openDlg(h('div',{class:'mn'},...lk.map(l=>h('div',{class:'frow'},h('span',{class:'who'},avc(l.user_id),nm(l.user_id)),h('span',{style:'font-size:1.3rem'},rxEm(l.kind||'like'))))))}
+const stkNode=v=>/^https:\/\/nykmahodzdlmxcmmfdws\.supabase\.co\/storage\/v1\/object\/public\/stickers\//.test(v)?h('img',{class:'stkimg',src:v,alt:'',style:'width:6rem'}):h('span',{style:'font-size:2.6rem;display:block'},v);
+const cmEl=(x,c,rp)=>h('div',{class:'cm2'+(rp?' rp':'')},avc(c.user_id),h('div',{class:'cbub'},nm(c.user_id),c.content?h('span',{},...mparts(c.content)):h('span'),c.image_url?h('img',{src:c.image_url,alt:'',onclick:()=>openUrl(c.image_url)}):h('span'),c.sticker?stkNode(c.sticker):h('span'),
+  h('div',{class:'cact'},h('small',{style:'color:var(--mut)'},hm(c.created_at)),h('button',{class:'link',onclick:()=>{FD.rt={post:x.id,parent:c.parent_id||c.id,name:uname(c.user_id)};render();setTimeout(()=>{const i=$('ci'+x.id);i&&i.focus()},60)}},t('reply')),c.user_id===S.me||S.prof.is_admin?h('button',{class:'link',onclick:()=>delCm(c)},t('del')):h('span'))));
+function cmBox(x){const rt=FD.rt&&FD.rt.post===x.id?FD.rt:null,pf=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{FD.cmImg=e.target.files[0]||null;render()}}),
+  inp=h('input',{id:'ci'+x.id,placeholder:rt?t('replyto')+' '+rt.name:t('commentph'),maxlength:500,onkeydown:e=>{if(e.key==='Enter')sendCm(x.id)}});
+  return h('div',{class:'cb2'},rt?h('small',{class:'link',onclick:()=>{FD.rt=null;render()}},'× '+rt.name):h('span'),FD.cmImg?h('small',{style:'color:var(--mut)'},FD.cmImg.name):h('span'),FD.cmSt?h('small',{style:'color:var(--mut)'},'Sticker ✓'):h('span'),
+    h('div',{class:'add'},inp,pf,h('button',{class:'ghost',type:'button','aria-label':t('photo'),onclick:()=>pf.click()},ico('media',18)),h('button',{class:'ghost',type:'button',onclick:pickCmSticker},'☺'),h('button',{class:'btn sm',onclick:()=>sendCm(x.id)},t('send'))))}
+function pickCmSticker(){openDlg(h('div',{class:'mn'},h('div',{class:'sp',style:'position:static;display:grid;width:auto;box-shadow:none;border:0;padding:0'},...STK.map(v=>h('button',{type:'button',onclick:()=>{FD.cmSt=v;closeDlg();render()}},v)),...S.stk.map(k=>h('button',{type:'button',onclick:()=>{FD.cmSt=k.url;closeDlg();render()}},h('img',{src:k.url,alt:''}))))))}
+async function sendCm(pid){const inp=$('ci'+pid),c=inp?inp.value.trim():'',f=FD.cmImg,st=FD.cmSt,rt=FD.rt&&FD.rt.post===pid?FD.rt:null;if(!c&&!f&&!st)return;let url=null;
+  if(f){if(f.size>5*1024*1024)return toast('> 5 MB');const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''),p=S.me+'/c'+Date.now()+'.'+ext,u=await sb.storage.from('posts').upload(p,f,{contentType:f.type||'image/jpeg'});if(u.error)return toast(u.error.message);url=sb.storage.from('posts').getPublicUrl(p).data.publicUrl}
+  const{error}=await sb.from('post_comments').insert({post_id:pid,content:c,parent_id:rt?rt.parent:null,image_url:url,sticker:st||null});if(error)return toast(error.message);FD.cmImg=null;FD.cmSt=null;FD.rt=null;await loadFeed()}
+async function delCm(c){const{error}=await sb.from('post_comments').delete().eq('id',c.id);error?toast(error.message):await loadFeed()}
 let ip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(S.me&&S.prof&&S.tab==='settings')render()});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
