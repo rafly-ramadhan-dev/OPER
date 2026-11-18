@@ -242,11 +242,11 @@ details summary{cursor:pointer;padding:.3rem 0;font-weight:600}
 .rxpill{position:absolute;bottom:calc(100% + .2rem);left:.6rem;background:var(--sf);border:1px solid var(--line);border-radius:999px;padding:.3rem .5rem;display:flex;gap:.2rem;box-shadow:0 6px 24px #0006;z-index:4}
 .rxpill button{font-size:1.7rem;background:none;border:0;cursor:pointer;transition:transform .12s;padding:0 .1rem}.rxpill button:hover{transform:scale(1.25) translateY(-4px)}
 .mobonly{display:none}
-#body.reels{padding:0;overflow:hidden;background:#000;height:100%}
-.rlw{position:relative;height:100%}
+#body.reels{padding:0;overflow:hidden;background:#000;position:relative}
+.rlw{position:absolute;inset:0}
 .rl{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}.rl::-webkit-scrollbar{display:none}
 .rr{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:grid;place-items:center;background:#000;overflow:hidden}
-.rv2{height:100%;width:100%;max-width:30rem;object-fit:cover;background:#000}
+.rv2{height:100%;width:100%;max-width:30rem;object-fit:contain;background:#000}
 .rtap{position:absolute;inset:0;z-index:1}
 .ract{position:absolute;right:max(.8rem,calc(50% - 15rem + .6rem));bottom:5rem;z-index:3;display:grid;gap:1.1rem;justify-items:center;color:#fff}
 .rlb{background:none;border:0;color:#fff;cursor:pointer;display:grid;justify-items:center;gap:.1rem;filter:drop-shadow(0 1px 3px #000a)}.rlb.liked{color:#ff3b5c}.rlb small{font-size:.8rem}
@@ -520,7 +520,8 @@ rlmax|Video maksimal 30 MB dan 90 detik|Video max 30 MB and 90 seconds|動画は
 rlnone|Belum ada reels. Jadilah yang pertama!|No reels yet. Be the first!|リールはまだありません。最初の投稿をしよう！
 rlup|Mengunggah reel...|Uploading reel...|リールをアップロード中...
 rlcm|Komentar|Comments|コメント
-pickvid|Pilih video|Choose video|動画を選ぶ`;
+pickvid|Pilih video|Choose video|動画を選ぶ
+callfull|Panggilan penuh (maksimal 6 orang)|Call is full (max 6 people)|通話は満員です（最大6人）`;
 const T={id:{},en:{},ja:{}};L.split('\n').forEach(r=>{const[k,a,b,c]=r.split('|');T.id[k]=a;T.en[k]=b;T.ja[k]=c});
 let lang=pref('lang')||{id:'id',ja:'ja'}[navigator.language.slice(0,2)]||'en';
 const t=k=>T[lang][k]||T.en[k]||k;
@@ -531,8 +532,11 @@ function applyTheme(){const d=document.documentElement,a=pref('accent');d.datase
 const S={me:null,prof:null,tab:'chats',peer:null,msgs:[],fr:[],pf:{},pp:{},gr:[],gm:[],on:new Set(),users:null,st:[],sv:new Set(),svw:[],ty:{},tyn:{},stk:[],pk:[],sr:[],mr:[],mf:'all'};
 const seen=new Set(),imgs=new Map();let primed=false,mode='in',ch=null,pc=null;
 const wide=()=>matchMedia('(min-width:900px)').matches;
-const VER='0.20';
-const CL={'0.20':`Reels: video pendek vertikal ala Instagram dengan suka, komentar, dan unggah video sendiri|Reels: Instagram-style short vertical videos with likes, comments, and your own uploads|リール：Instagram風の縦型ショート動画（いいね・コメント・投稿）
+const VER='0.21';
+const CL={'0.21':`Telepon grup: grup berisi lebih dari 6 orang kini bisa dipanggil (maksimal 6 orang yang tersambung)|Group calls: groups with more than 6 members can now be called (up to 6 can join)|グループ通話：7人以上のグループにも発信可能に（参加は最大6人）
+Reels: video terbaru tampil paling atas dan diperbarui tiap membuka tab|Reels: newest videos first, refreshed each time you open the tab|リール：新しい動画が先頭に表示、タブを開くたびに更新
+Reels: video tampil sesuai bentuk aslinya, tidak dipotong atau dipaksa lanskap|Reels: videos show in their original shape, no cropping or forced landscape|リール：動画は元の比率のまま表示（切り抜きや横長の強制なし）`,
+'0.20':`Reels: video pendek vertikal ala Instagram dengan suka, komentar, dan unggah video sendiri|Reels: Instagram-style short vertical videos with likes, comments, and your own uploads|リール：Instagram風の縦型ショート動画（いいね・コメント・投稿）
 Menu Media di HP pindah ke tombol di daftar obrolan|On phones, Media moved to a button in the chat list|スマホではメディアをチャット一覧のボタンへ移動`,
 '0.19':`Reaksi emoji apa saja pada pesan pribadi dan grup (tekan tahan pesan)|Emoji reactions on any private or group message (long-press)|個人・グループのメッセージに好きな絵文字でリアクション（長押し）
 Tombol suka ala Facebook dengan bilah reaksi mengambang|Facebook-style like button with a floating reaction bar|Facebook風のいいねボタンとリアクションバー
@@ -642,7 +646,7 @@ function render(){
   document.title=(tot()?'('+tot()+') ':'')+'Oper';
   document.body.dataset.tab=S.tab;document.body.classList.toggle('open',S.tab==='chats'&&!!S.peer);
   const pend=S.fr.filter(f=>f.status==='pending'&&f.addressee===S.me).length;
-  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'+(S.mt.on?' 🛠':'')),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),'aria-label':t(k),title:t(k),'data-k':k,onclick:()=>{if(k===S.tab)return;if(k==='notif')pref('notifseen',new Date().toISOString());if(k==='chats'){if(history.state&&history.state.t){history.back();return}}else if(S.tab==='chats')history.pushState({t:1},'');S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k==='global')S.peer=GK;else if(k!=='chats')S.peer=null;vt(render)}},ico(k,24),h('span',{class:'tl'},t(k)),nbadge(k,pend)?h('i',{class:'dot'},nbadge(k,pend)):null)));
+  $('nav').replaceChildren(h('b',{class:'logo'},'Oper'+(S.mt.on?' 🛠':'')),...TABS.map(k=>h('button',{class:'tab'+(S.tab===k?' on':''),'aria-label':t(k),title:t(k),'data-k':k,onclick:()=>{if(k===S.tab)return;if(k==='notif')pref('notifseen',new Date().toISOString());if(k==='reels')RL.loaded=false;if(k==='chats'){if(history.state&&history.state.t){history.back();return}}else if(S.tab==='chats')history.pushState({t:1},'');S.tab=k;if(k==='chats'&&wide())S.peer=S.peer||S.me;if(k==='global')S.peer=GK;else if(k!=='chats')S.peer=null;vt(render)}},ico(k,24),h('span',{class:'tl'},t(k)),nbadge(k,pend)?h('i',{class:'dot'},nbadge(k,pend)):null)));
   renderSide();
   const chat=(S.tab==='chats'&&S.peer)||S.tab==='global';$('composer').hidden=!chat;$('chead').hidden=!chat;$('main').classList.toggle('bg',!!chat&&pref('bg')!=='plain');$('main').classList.toggle('img',pref('bg')==='img'&&!!pref('bgimg'));applyBg();$('chead').style.cursor=S.peer&&S.peer!==S.me&&S.peer!==GK?'pointer':'';
   if(S.tab==='chats'||S.tab==='global')chat?renderChat():($('body').className='pane',$('body').replaceChildren(h('p',{class:'empty'},t('pick'))));
@@ -991,15 +995,16 @@ function dropPeer(u){if(!K)return;const P=K.peers[u];if(P){try{P.pc&&P.pc.close(
 async function flushQ(P){while(P.q.length)await P.pc.addIceCandidate(P.q.shift())}
 function joinCall(){return new Promise(res=>{K.ch=sb.channel('call-'+K.id);
   K.ch.on('broadcast',{event:'sig'},async({payload:m})=>{if(!K||m.f===S.me||(m.to&&m.to!==S.me))return;try{
-    if(m.h){if(Object.keys(K.peers).length>=MAXC-1||(K.helloT&&Date.now()-K.helloT<4000&&S.me>m.f))return;
+    if(m.h){if(Object.keys(K.peers).length>=MAXC-1&&!K.peers[m.f]){K.ch.send({type:'broadcast',event:'sig',payload:{f:S.me,to:m.f,full:1}});return}if(K.helloT&&Date.now()-K.helloT<4000&&S.me>m.f)return;
       const P=peerPc(m.f),o=await P.pc.createOffer();await P.pc.setLocalDescription(o);K.ch.send({type:'broadcast',event:'sig',payload:{f:S.me,to:m.f,o:P.pc.localDescription}})}
     else if(m.o){const P=peerPc(m.f);await P.pc.setRemoteDescription(m.o);await flushQ(P);const a=await P.pc.createAnswer();await P.pc.setLocalDescription(a);K.ch.send({type:'broadcast',event:'sig',payload:{f:S.me,to:m.f,a:P.pc.localDescription}})}
     else if(m.a){const P=K.peers[m.f];if(P){await P.pc.setRemoteDescription(m.a);await flushQ(P)}}
     else if(m.c){const P=peerPc(m.f);if(P.pc.remoteDescription)await P.pc.addIceCandidate(m.c);else P.q.push(m.c)}
+    else if(m.full){endCall(false);toast(t('callfull'))}
     else if(m.b)dropPeer(m.f)}catch{}});
   K.ch.subscribe(st=>{if(st==='SUBSCRIBED')res()})})}
 async function startCall(video){const peer=S.peer;if(K||!peer||peer===S.me||peer===GK)return;const g=isG(peer);let to=[peer];
-  if(g){const gid=peer.slice(2);to=S.gm.filter(x=>x.group_id===gid&&x.user_id!==S.me).map(x=>x.user_id);if(!to.length)return;if(to.length+1>MAXC)return toast(t('callmax'))}
+  if(g){const gid=peer.slice(2);to=S.gm.filter(x=>x.group_id===gid&&x.user_id!==S.me).map(x=>x.user_id);if(!to.length)return}
   else if(!friends().includes(peer))return;
   if(!await getMedia(video))return;
   K={id:crypto.randomUUID(),key:peer,video,role:'out',state:'ringing',peers:{},to};drawCall();await joinCall();
